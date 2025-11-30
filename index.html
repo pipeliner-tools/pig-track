@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pig Velocity & ETA Calculator (v2.3)</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- 1. RESET & BASE STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+            padding: 20px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. LAYOUT GRID --- */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr; 
+            gap: 20px;
+        }
+
+        .col-inputs, .col-results {
+            min-width: 0; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+        }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* --- 3. COMPONENTS --- */
+        
+        /* Header */
+        .header-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+            position: relative; 
+        }
+        .header-title h1 { font-size: 1.25rem; color: white; font-weight: 700; }
+        .header-title p { font-size: 0.85rem; color: #94a3b8; }
+        
+        /* --- VALIDATION CONSOLE --- */
+        #validation-console {
+            grid-column: 1 / -1;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .msg-box {
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .msg-error { background: rgba(239, 68, 68, 0.2); border: 1px solid #7f1d1d; color: #fca5a5; }
+        .msg-warn { background: rgba(245, 158, 11, 0.2); border: 1px solid #78350f; color: #fcd34d; }
+
+        /* Validation Input States */
+        .input-error { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.1); }
+        .input-warning { border-color: #f59e0b !important; }
+
+        /* --- MENU BUTTON & DROPDOWN --- */
+        .menu-container {
+            position: relative;
+        }
+
+        .btn-menu {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #cbd5e1;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-menu:hover, .btn-menu.active {
+            background: #1e293b;
+            color: white;
+            border-color: #475569;
+        }
+
+        .menu-dropdown {
+            display: none; 
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            width: 180px;
+            z-index: 50;
+            overflow: hidden;
+        }
+        .menu-dropdown.show { display: block; }
+
+        .menu-item {
+            padding: 12px 16px;
+            color: #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            border-bottom: 1px solid #334155;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:hover { background: #334155; color: white; }
+        .menu-item i { width: 20px; text-align: center; color: #60a5fa; }
+
+        /* Cards */
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 100%; 
+            overflow: hidden; 
+        }
+
+        .section-header {
+            color: #60a5fa; 
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .input-group { margin-bottom: 10px; }
+        
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            display: flex;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            overflow: hidden; 
+            transition: border-color 0.2s;
+            max-width: 100%;
+        }
+        .input-wrapper:focus-within { border-color: #3b82f6; }
+
+        .input-field {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            min-width: 0; 
+        }
+        .input-field:focus { outline: none; }
+
+        /* --- UNIT SELECTOR STYLE --- */
+        .modern-select {
+            flex: 0 0 auto;
+            appearance: none; 
+            -webkit-appearance: none;
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: none;
+            border-left: 1px solid #334155;
+            padding: 0 12px; 
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 0;
+            font-weight: 500;
+            text-align: center;
+            background-image: none;
+            transition: background-color 0.2s;
+        }
+        .modern-select:hover { background-color: #334155; color: white; }
+        .modern-select:focus { outline: none; background-color: #334155; color: white; }
+
+        /* --- NEW: PRIMARY FULL-WIDTH SELECTOR STYLE --- */
+        .select-primary {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px 12px; /* Matches input-field padding */
+            font-family: monospace; /* Matches input-field font */
+            font-size: 0.95rem;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            /* Custom Arrow Icon */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 10px auto;
+        }
+        .select-primary:focus { outline: none; }
+        .select-primary option { background: #1e293b; color: #e2e8f0; }
+
+
+        .unit-label-static {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            border-left: 1px solid #334155;
+            color: #64748b;
+            font-size: 0.8rem;
+            padding: 0 12px;
+            font-weight: 500;
+        }
+
+        .read-only-val {
+            padding: 8px;
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .read-only-val strong { color: white; }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            background: #0f172a;
+            border-radius: 4px;
+            padding: 2px;
+            border: 1px solid #334155;
+        }
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .toggle-btn.active { background: #3b82f6; color: white; }
+
+        /* Checkpoint UI */
+        #wp-list {
+            max-height: 250px; 
+            overflow-y: auto;  
+            margin-bottom: 10px;
+            padding-right: 2px;
+        }
+        #wp-list::-webkit-scrollbar { width: 4px; }
+        #wp-list::-webkit-scrollbar-track { background: transparent; }
+        #wp-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        .wp-item {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            padding: 8px;
+        }
+        .wp-row-main {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .wp-row-actual {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border-top: 1px dashed #334155;
+            padding-top: 5px;
+        }
+        .wp-label-small {
+            font-size: 0.7rem; color: #94a3b8; width: 60px;
+        }
+
+        .wp-btn-add {
+            width: 100%;
+            background: #1e293b;
+            border: 1px dashed #475569;
+            color: #94a3b8;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .wp-btn-add:hover { background: #334155; color: white; }
+        .wp-btn-del {
+            background: #3f1515; color: #f87171; border: 1px solid #7f1d1d;
+            border-radius: 4px; width: 30px; min-width: 30px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .wp-btn-del:hover { background: #7f1d1d; color: white; }
+        
+        .wp-btn-clear {
+            background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 0.8em;
+        }
+        .wp-btn-clear:hover { color: #cbd5e1; }
+
+        .wp-input {
+            background: #1e293b; 
+            border: 1px solid #475569; 
+            color: white;
+            padding: 6px; 
+            border-radius: 4px; 
+            font-size: 0.85rem; 
+            font-family: monospace;
+            min-width: 0; 
+            width: 100%; 
+        }
+        .wp-input:focus { outline: none; border-color: #3b82f6; }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .status-passed { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4); }
+        .status-coming { background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.4); }
+        .status-confirmed { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+        .dash-amber { background: rgba(180, 83, 9, 0.2) !important; border-color: rgba(180, 83, 9, 0.5) !important; }
+        .dash-amber .dash-label { color: #fbbf24 !important; }
+
+        .hidden { display: none !important; }
+
+        /* --- 4. RESULTS DASHBOARD --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        .dash-card {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid;
+            width: 100%;
+        }
+        
+        .dash-blue { background: rgba(30, 58, 138, 0.2); border-color: rgba(30, 58, 138, 0.5); }
+        .dash-purple { background: rgba(88, 28, 135, 0.2); border-color: rgba(88, 28, 135, 0.5); }
+        .dash-green { background: rgba(6, 78, 59, 0.2); border-color: rgba(6, 78, 59, 0.5); }
+
+        .dash-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .dash-blue .dash-label { color: #60a5fa; }
+        .dash-purple .dash-label { color: #c084fc; }
+        .dash-green .dash-label { color: #34d399; }
+
+        .dash-value { font-size: 1.8rem; font-weight: 700; color: white; font-family: monospace; line-height: 1.1; word-break: break-all; }
+        .dash-unit { font-size: 0.75rem; color: #94a3b8; font-family: sans-serif; font-weight: normal; }
+        
+        .dash-sub {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            font-family: monospace;
+        }
+
+        /* --- 5. VISUALIZATION --- */
+        .pipeline-graphic {
+            position: relative;
+            height: 30px;
+            background: #020617;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            overflow: hidden; 
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .pipeline-flow {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(
+                45deg, 
+                rgba(59, 130, 246, 0.15) 25%, transparent 25%, 
+                transparent 50%, rgba(59, 130, 246, 0.15) 50%, 
+                rgba(59, 130, 246, 0.15) 75%, transparent 75%, transparent
+            );
+            background-size: 20px 20px;
+            animation: flowScroll 1s linear infinite;
+        }
+
+        .pig-container {
+            position: absolute; top: 50%; left: 0;
+            transform: translate(-50%, -50%);
+            z-index: 20; 
+            display: flex; align-items: center; justify-content: center;
+            width: auto; pointer-events: none;
+        }
+
+        .pig-svg { display: block; height: 28px; width: 50px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.6)); }
+
+        .wp-tick {
+            position: absolute;
+            top: 0; bottom: 0; width: 2px;
+            background: rgba(255,255,255,0.3);
+            z-index: 10;
+        }
+        .wp-tick:hover::after {
+            content: attr(data-name);
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            background: black; color: white; padding: 2px 4px; font-size: 10px;
+            border-radius: 2px; white-space: nowrap;
+        }
+
+        .chainage-badge {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 9px;
+            font-family: monospace;
+            padding: 0 4px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
+        }
+
+        .vis-labels {
+            display: flex; justify-content: space-between;
+            font-size: 0.65rem; color: #64748b; font-family: monospace;
+        }
+
+        /* --- 6. DATA TABLE --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; 
+            margin-bottom: 5px;
+        }
+        
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 100%; }
+        .data-table th { text-align: left; color: #64748b; background: #0f172a; padding: 8px; border-bottom: 1px solid #334155; }
+        .data-table td { padding: 8px; border-bottom: 1px solid #1e293b; color: #cbd5e1; white-space: nowrap; }
+        .data-table .mono { font-family: monospace; color: #e2e8f0; }
+
+        /* --- 7. MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            width: 90%; max-width: 500px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px;
+        }
+        .modal-title { color: white; font-weight: 700; font-size: 1.1rem; }
+        .modal-close {
+            background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;
+        }
+        .modal-close:hover { color: white; }
+        
+        .scenario-list {
+            max-height: 300px; overflow-y: auto;
+            margin-top: 15px; border: 1px solid #334155; border-radius: 4px;
+        }
+        .scenario-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid #334155; background: #0f172a;
+        }
+        .scenario-item:last-child { border-bottom: none; }
+        .scenario-info { display: flex; flex-direction: column; }
+        .scenario-name { color: #e2e8f0; font-weight: 600; font-size: 0.9rem; }
+        .scenario-date { color: #64748b; font-size: 0.75rem; }
+        .scenario-actions { display: flex; gap: 8px; }
+
+        /* --- 8. PRINT REPORT LAYOUT --- */
+        #report-view { display: none; }
+
+        @media print {
+            body { 
+                background: white; color: black; margin: 0; padding: 0; 
+                overflow: visible; 
+            }
+            /* Hide the App */
+            .container, .header-bar, #modal-scenarios { display: none !important; }
+            
+            /* Show the Report */
+            #report-view {
+                display: block;
+                width: 100%;
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            /* Report Styles */
+            .rpt-header {
+                display: flex; justify-content: space-between; align-items: center;
+                border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;
+            }
+            .rpt-title h1 { font-size: 24px; margin: 0; text-transform: uppercase; color: #1e3a8a; }
+            .rpt-title p { margin: 5px 0 0; color: #666; font-size: 14px; }
+            .rpt-meta { text-align: right; font-size: 12px; color: #444; }
+
+            .rpt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px; }
+            
+            .rpt-section { margin-bottom: 20px; }
+            .rpt-h2 { 
+                font-size: 14px; font-weight: bold; text-transform: uppercase; 
+                color: #1e3a8a; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; 
+            }
+
+            .rpt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            .rpt-table th { text-align: left; background: #f1f5f9; padding: 6px; border-bottom: 2px solid #ccc; font-weight: bold; }
+            .rpt-table td { padding: 6px; border-bottom: 1px solid #eee; }
+            .rpt-table tr:last-child td { border-bottom: none; }
+            
+            .rpt-summary {
+                background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 4px;
+                display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;
+            }
+            .rpt-sum-item h3 { font-size: 12px; color: #64748b; margin: 0 0 5px; text-transform: uppercase; }
+            .rpt-sum-item div { font-size: 18px; font-weight: bold; color: #0f172a; }
+
+            .rpt-footer {
+                margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd;
+                text-align: center; font-size: 10px; color: #888;
+            }
+        }
+        
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1001;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @keyframes flowScroll { from { background-position: 0 0; } to { background-position: 20px 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="header-bar">
+            <div class="header-title">
+                <h1>Pig Velocity & ETA Calculator</h1>
+                <p>Offline Version</p>
+            </div>
+            
+            <!-- Unified Menu -->
+            <div class="menu-container">
+                <button class="btn-menu" onclick="toggleMenu()" title="Menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="menu-dropdown" id="main-menu">
+                    <div class="menu-item" onclick="handleMenuAction('scenario')">
+                        <i class="fas fa-folder-open"></i> Scenarios
+                    </div>
+                    <div class="menu-item" onclick="handleMenuAction('share')">
+                        <i class="fas fa-link"></i> Share Link
+                    </div>
+                    <div class="menu-item" onclick="handleMenuAction('report')">
+                        <i class="fas fa-print"></i> Print Report
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: VALIDATION CONSOLE -->
+        <div id="validation-console"></div>
+
+        <!-- LEFT COLUMN: Inputs -->
+        <div class="col-inputs">
+            
+            <!-- Geometry -->
+            <div class="card">
+                <div class="section-header">Pipeline Geometry</div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Outer Diameter</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-od" class="input-field calc-trigger" value="36" step="0.1">
+                            <select id="sel-od-unit" class="modern-select unit-change-trigger" data-input="inp-od" data-type="length">
+                                <option value="inch">inch</option>
+                                <option value="mm">mm</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Wall Thickness</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-wt" class="input-field calc-trigger" value="12.7" step="0.1">
+                            <select id="sel-wt-unit" class="modern-select unit-change-trigger" data-input="inp-wt" data-type="length">
+                                <option value="mm">mm</option>
+                                <option value="inch">inch</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Inner Diameter (Calculated)</label>
+                    <div class="read-only-val" id="val-id"><strong>889</strong> mm</div>
+                </div>
+                
+                <div class="grid-2" style="margin-top:10px; border-top:1px solid #334155; padding-top:10px;">
+                    <div class="input-group">
+                        <label>Launcher Chainage</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-ch-start" class="input-field calc-trigger" value="0.0" step="0.1">
+                            <select id="sel-dist-unit" class="modern-select unit-change-trigger" data-input="inp-ch-start,inp-ch-end" data-type="distance">
+                                <option value="km">km</option>
+                                <option value="mile">mile</option>
+                                <option value="m">m</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Receiver Chainage</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-ch-end" class="input-field calc-trigger" value="80.3" step="0.1">
+                            <div class="unit-label-static" id="lbl-dist-unit-end">km</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Section Length</label>
+                    <div class="read-only-val"><span id="val-length"><strong>80.3</strong></span> km</div>
+                </div>
+            </div>
+
+            <!-- Operating Conditions -->
+            <div class="card">
+                <div class="section-header">
+                    <span>Operating Conditions</span>
+                    <!-- Mode Toggle -->
+                    <div class="toggle-container">
+                        <button class="toggle-btn active" id="btn-mode-gas" onclick="setMode('gas')">Gas</button>
+                        <button class="toggle-btn" id="btn-mode-liquid" onclick="setMode('liquid')">Liquid</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Flow Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="inp-flow" class="input-field calc-trigger" value="300000" step="1000">
+                        <select id="sel-flow-unit" class="modern-select unit-change-trigger" data-input="inp-flow" data-type="flow">
+                            <!-- Populated dynamically via JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Inlet Pressure</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-pin" class="input-field calc-trigger" value="56" step="1">
+                            <select id="sel-press-unit" class="modern-select unit-change-trigger" data-input="inp-pin,inp-pout" data-type="pressure">
+                                <option value="kgcm2">kg/cm²g</option>
+                                <option value="bar">bar g</option>
+                                <option value="psi">psig</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Outlet Pressure</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-pout" class="input-field calc-trigger" value="55" step="1">
+                            <div class="unit-label-static" id="lbl-press-unit-out">kg/cm²g</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Temperature</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-temp" class="input-field calc-trigger" value="22" step="1">
+                            <select id="sel-temp-unit" class="modern-select unit-change-trigger" data-input="inp-temp" data-type="temp">
+                                <option value="c">°C</option>
+                                <option value="f">°F</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- GAS ONLY -->
+                    <div class="input-group" id="group-sg">
+                        <label>Specific Gravity</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-sg" class="input-field calc-trigger" value="0.60" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <!-- LIQUID ONLY -->
+                    <div class="input-group hidden" id="group-visc">
+                        <label>Viscosity (cP)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-visc" class="input-field calc-trigger" value="1.0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ops (Updated for Pig Slip Factor) -->
+            <div class="card">
+                <div class="section-header">Pigging Data</div>
+                <div class="input-group">
+                    <label>Launch Date & Time</label>
+                    <div class="input-wrapper">
+                        <input type="datetime-local" id="inp-launch" class="input-field calc-trigger">
+                    </div>
+                </div>
+                <!-- NEW GRID -->
+                <div class="grid-2">
+                    <div class="input-group">
+                        <label>Pig Type</label>
+                        <div class="input-wrapper">
+                            <select id="sel-pig-type" class="select-primary">
+                                <option value="custom">Custom / Manual</option>
+                                <option value="smart">Intelligent (ILI)</option>
+                                <option value="bidi" selected>Bi-Directional (Disc)</option>
+                                <option value="cup">Cup Pig</option>
+                                <option value="sphere">Sphere</option>
+                                <option value="foam-h">Foam (High Dens.)</option>
+                                <option value="foam-l">Foam (Low Dens.)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Sealing Eff. (%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="inp-eff" class="input-field calc-trigger"
+                                   value="99" max="100" min="50" step="0.1"
+                                   oninput="document.getElementById('sel-pig-type').value='custom'">
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top:-5px;">
+                    * Factor of 99% means Pig Velocity = 0.99 × Flow Velocity
+                </div>
+            </div>
+
+            <!-- SV Stations Input -->
+            <div class="card">
+                <div class="section-header">SV Stations</div>
+                <div id="wp-list">
+                    <!-- Dynamic Rows Go Here -->
+                </div>
+                <button class="wp-btn-add" onclick="addWaypoint()">+ Add SV</button>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Results -->
+        <div class="col-results">
+            
+            <!-- Dashboard -->
+            <div class="dashboard-grid">
+                <div class="dash-card dash-blue" id="card-velocity">
+                    <div class="dash-label" id="label-velocity">Velocity (Calc)</div>
+                    <div class="dash-value" id="out-vel-ms">0.00</div>
+                    <div class="dash-unit">m/s</div>
+                    <div class="dash-sub"><span id="out-vel-kmh">0.00</span> km/h</div>
+                </div>
+                <div class="dash-card dash-purple">
+                    <div class="dash-label">Transit Time</div>
+                    <div class="dash-value" id="out-time-hhmm">00:00</div>
+                    <div class="dash-unit">hours:min</div>
+                    <div class="dash-sub"><span id="out-time-dec">0.00</span> decimal hrs</div>
+                </div>
+                <div class="dash-card dash-green">
+                    <div class="dash-label">Est. Arrival</div>
+                    <div class="dash-value" style="font-size:1.4rem; margin-top:5px;" id="out-eta-time">--:--</div>
+                    <div class="dash-sub" id="out-eta-date">--/--/----</div>
+                </div>
+            </div>
+
+            <!-- Live Position -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:5px;">
+                    <div class="section-header" style="border:none; margin:0; padding:0;">Live Position</div>
+                    <div id="pig-status-text" style="font-size:0.75rem; font-weight:bold; color:#60a5fa;">Ready</div>
+                </div>
+
+                <div class="pipeline-graphic" id="pipeline-vis">
+                    <div class="pipeline-flow" id="flow-anim"></div>
+                    <!-- Ticks inserted here via JS -->
+                    
+                    <!-- Pig Container -->
+                    <div class="pig-container" id="pig-anim">
+                        <svg class="pig-svg" width="50" height="28" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="15" cy="30" rx="8" ry="28" fill="#dc2626" stroke="#991b1b" stroke-width="2" />
+                            <rect x="15" y="10" width="50" height="40" fill="#94a3b8" stroke="#475569" />
+                            <ellipse cx="65" cy="30" rx="8" ry="28" fill="#dc2626" stroke="#991b1b" stroke-width="2" />
+                            <path d="M 65 15 Q 85 30 65 45" fill="#ef4444" />
+                            <path d="M 20 15 L 60 15" stroke="white" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+                        </svg>
+                        <div class="chainage-badge" id="pig-chainage-badge">0.000 km</div>
+                    </div>
+                </div>
+
+                <div class="vis-labels">
+                    <span id="label-launcher">Launcher</span>
+                    <span id="progress-text">0%</span>
+                    <span id="label-receiver">Receiver</span>
+                </div>
+            </div>
+
+            <!-- SV Station ETA Results -->
+            <div class="card" id="card-wp-results" style="display:none;">
+                <div class="section-header">SV Station ETA</div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Point</th>
+                                <th>Chainage</th>
+                                <th>ETA / Actual</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wp-result-body">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Parameters Table -->
+            <div class="card">
+                <div class="section-header" id="label-details">Calculation Details (AGA / CNGA)</div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="row-pavg">
+                                <td>Average Pressure (P<sub>avg</sub>)</td>
+                                <td class="mono"><span id="out-pavg">0</span> kg/cm²a</td>
+                                <td>Calculated using 2/3 rule</td>
+                            </tr>
+                            <tr id="row-z">
+                                <td>Compressibility (Z)</td>
+                                <td class="mono"><span id="out-z">0</span></td>
+                                <td>CNGA Equation</td>
+                            </tr>
+                            <tr>
+                                <td>Actual Flow (Q<sub>act</sub>)</td>
+                                <td class="mono"><span id="out-qact">0</span> m³/day</td>
+                                <td>Flow at Line Conditions</td>
+                            </tr>
+                            <tr>
+                                <td>Line Volume</td>
+                                <td class="mono"><span id="out-vol">0</span> m³</td>
+                                <td>Total Physical Volume</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast">Link copied to clipboard!</div>
+
+    <!-- MODAL -->
+    <div id="modal-scenarios" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Scenario Manager</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            
+            <div class="input-wrapper" style="margin-bottom:10px;">
+                <input type="text" id="scenario-name" class="input-field" placeholder="Scenario Name (e.g. 24 inch Gas)" style="background:#0f172a;">
+                <button class="wp-btn-add" onclick="saveCurrentScenario()" style="width: auto; border-radius:0 4px 4px 0; background: #2563eb; color:white; border:none;">Save</button>
+            </div>
+
+            <div class="scenario-list" id="list-scenarios">
+                <!-- Items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PRINT REPORT TEMPLATE (Hidden unless printing) -->
+    <div id="report-view">
+        <div class="rpt-header">
+            <div class="rpt-title">
+                <h1>Pig Velocity & ETA Report</h1>
+                <p>Generated by Pipeliner Tools</p>
+            </div>
+            <div class="rpt-meta">
+                <div id="rpt-date">Date: --/--/----</div>
+                <div>Status: <strong id="rpt-status">Ready</strong></div>
+            </div>
+        </div>
+
+        <div class="rpt-section">
+            <div class="rpt-h2">Key Results</div>
+            <div class="rpt-summary">
+                <div class="rpt-sum-item">
+                    <h3>Avg Velocity</h3>
+                    <div id="rpt-vel">0.00 m/s</div>
+                </div>
+                <div class="rpt-sum-item">
+                    <h3>Transit Time</h3>
+                    <div id="rpt-time">00:00</div>
+                </div>
+                <div class="rpt-sum-item">
+                    <h3>Est. Arrival</h3>
+                    <div id="rpt-eta">--:--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rpt-grid">
+            <div class="rpt-section">
+                <div class="rpt-h2">Geometry</div>
+                <table class="rpt-table">
+                    <tr><td>Pipeline OD</td><td><span id="rpt-od"></span> <span id="rpt-od-u"></span></td></tr>
+                    <tr><td>Wall Thickness</td><td><span id="rpt-wt"></span> <span id="rpt-wt-u"></span></td></tr>
+                    <tr><td>Inner Diameter</td><td id="rpt-id"></td></tr>
+                    <tr><td>Total Length</td><td id="rpt-len"></td></tr>
+                    <tr><td>Line Volume</td><td id="rpt-vol"></td></tr>
+                </table>
+            </div>
+            <div class="rpt-section">
+                <div class="rpt-h2">Operations</div>
+                <table class="rpt-table">
+                    <tr><td>Medium</td><td id="rpt-mode" style="text-transform:capitalize">Gas</td></tr>
+                    <tr><td>Flow Rate</td><td><span id="rpt-flow"></span> <span id="rpt-flow-u"></span></td></tr>
+                    <tr><td>Pressure (In/Out)</td><td><span id="rpt-pin"></span> / <span id="rpt-pout"></span> <span id="rpt-p-u"></span></td></tr>
+                    <tr><td>Temperature</td><td><span id="rpt-temp"></span> <span id="rpt-temp-u"></span></td></tr>
+                    <tr><td>Launch Time</td><td id="rpt-launch"></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="rpt-section">
+            <div class="rpt-h2">Station Log (SV List)</div>
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th style="width:40%">Station Name</th>
+                        <th style="width:20%">Chainage</th>
+                        <th style="width:25%">Time (Actual/ETA)</th>
+                        <th style="width:15%">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rpt-sv-body">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="rpt-footer">
+            Report generated at <span id="rpt-gen-time"></span>. All calculations are theoretical estimates unless actual times are provided.
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL VARIABLES ---
+        let currentMode = 'gas'; 
+        let waypoints = []; // Array of {id, name, km, actualTime}
+        let savedScenarios = []; // Array of {id, name, date, data}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- CONSTANTS & HELPERS ---
+            const SCMH_TO_SCFD = 35.3147 * 24; 
+            const CFT_TO_M3 = 0.0283168;
+            const KGCM2_TO_PSI = 14.2233;
+            const STANDARD_PRESSURE_PSIA = 14.7;
+            const STANDARD_TEMP_R = 520;
+
+            let totalTravelHours = 0;
+            let pipelineLengthKm = 0;
+            let launcherKm = 0;
+            let receiverKm = 0;
+            
+            // To pass data to report
+            let rptData = {
+                vel: 0, etaDate: null, status: 'Ready'
+            };
+
+            const lastUnits = {
+                'sel-od-unit': 'inch',
+                'sel-wt-unit': 'mm',
+                'sel-dist-unit': 'km',
+                'sel-flow-unit': 'scmh',
+                'sel-press-unit': 'kgcm2',
+                'sel-temp-unit': 'c'
+            };
+
+            const flowOptions = {
+                gas: [{val: 'scmh', label: 'SCMH'}, {val: 'mmscfd', label: 'MMSCFD'}],
+                liquid: [{val: 'm3hr', label: 'm³/hr'}, {val: 'bblday', label: 'bbl/day'}]
+            };
+            
+            // NEW: PIG PRESETS
+            const pigPresets = {
+                'smart': 99.5,
+                'bidi': 99.0,
+                'cup': 97.0,
+                'sphere': 95.0,
+                'foam-h': 92.0,
+                'foam-l': 88.0
+            };
+
+            const safeStorage = {
+                save: function(key, data) {
+                    try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+                },
+                load: function(key) {
+                    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+                }
+            };
+
+            function getVal(id) {
+                const el = document.getElementById(id);
+                return el ? parseFloat(el.value) : NaN;
+            }
+            
+            // PIG SELECT LISTENER
+            const pigSelect = document.getElementById('sel-pig-type');
+            const effInput = document.getElementById('inp-eff');
+            if(pigSelect && effInput) {
+                pigSelect.addEventListener('change', function() {
+                    const type = this.value;
+                    if(type !== 'custom' && pigPresets[type]) {
+                        effInput.value = pigPresets[type];
+                        effInput.style.color = '#34d399'; // Flash Green
+                        setTimeout(() => effInput.style.color = 'white', 300);
+                        calculate();
+                    }
+                });
+            }
+
+            // --- VALIDATION HELPERS ---
+            function clearValidation() {
+                // Clear global messages
+                const consoleEl = document.getElementById('validation-console');
+                consoleEl.innerHTML = '';
+                consoleEl.style.display = 'none';
+
+                // Remove red/amber borders from all inputs
+                document.querySelectorAll('.input-field, .wp-input').forEach(el => {
+                    el.classList.remove('input-error', 'input-warning');
+                });
+            }
+
+            function addMessage(type, text, targetInputId = null) {
+                const consoleEl = document.getElementById('validation-console');
+                consoleEl.style.display = 'flex';
+
+                const div = document.createElement('div');
+                div.className = `msg-box ${type === 'error' ? 'msg-error' : 'msg-warn'}`;
+                div.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i> ${text}`;
+                consoleEl.appendChild(div);
+
+                if (targetInputId) {
+                    const el = document.getElementById(targetInputId);
+                    if(el) el.classList.add(type === 'error' ? 'input-error' : 'input-warning');
+                }
+            }
+
+            // --- VALIDATION LOGIC ---
+            function runValidation(vals) {
+                let isValid = true;
+                
+                // 1. GEOMETRY CHECK: Wall Thickness vs OD
+                const idMm = vals.odMm - (2 * vals.wtMm);
+                if (idMm <= 0) {
+                    addMessage('error', `Invalid Geometry: Wall thickness (${vals.wtMm.toFixed(1)}mm) is too large for OD (${vals.odMm.toFixed(1)}mm).`, 'inp-wt');
+                    document.getElementById('inp-od').classList.add('input-error');
+                    isValid = false; 
+                }
+
+                // 2. LENGTH CHECK
+                if (Math.abs(vals.endKm - vals.startKm) < 0.001) {
+                    addMessage('error', 'Invalid Length: Launcher and Receiver coordinates cannot be the same.', 'inp-ch-end');
+                    isValid = false;
+                }
+
+                // 3. PRESSURE LOGIC (Warning only)
+                if (vals.pinKg < vals.poutKg) {
+                    addMessage('warn', 'Outlet Pressure is higher than Inlet Pressure. Verify inputs.', 'inp-pin');
+                    document.getElementById('inp-pout').classList.add('input-warning');
+                }
+
+                // 4. TIMELINE & LOCATION LOGIC
+                const launchVal = document.getElementById('inp-launch').value;
+                const now = new Date().getTime();
+                const distUnit = document.getElementById('sel-dist-unit').value;
+                
+                // Bounds for SV Station
+                const startKm = vals.startKm;
+                const endKm = vals.endKm;
+                const minKm = Math.min(startKm, endKm);
+                const maxKm = Math.max(startKm, endKm);
+
+                if (launchVal) {
+                    const launchTime = new Date(launchVal).getTime();
+                    
+                    waypoints.forEach(wp => {
+                        // A. Time Logic
+                        if (wp.actualTime) {
+                            const svTime = new Date(wp.actualTime).getTime();
+                            
+                            // Check: Arrival before Launch
+                            if (svTime <= launchTime) {
+                                addMessage('error', `Time Paradox: Station '${wp.name || 'SV'}' marked as arrived before Launch Time.`, null);
+                                isValid = false;
+                            }
+                            
+                            // Check: Future Time
+                            if (svTime > now) {
+                                addMessage('error', `Future Date Error: Station '${wp.name || 'SV'}' actual arrival time cannot be in the future.`, null);
+                                isValid = false;
+                            }
+                        }
+
+                        // B. Location Logic
+                        if (wp.km !== "") {
+                            let wpKm = parseFloat(wp.km);
+                            if(!isNaN(wpKm)) {
+                                // Convert raw input to base KM for comparison
+                                const wpKmBase = converters.distance.toBase(wpKm, distUnit);
+                                
+                                // Allow small float tolerance
+                                if((wpKmBase < minKm - 0.1) || (wpKmBase > maxKm + 0.1)) {
+                                    addMessage('error', `Location Error: Station '${wp.name || 'SV'}' (${wp.km}) is outside the pipeline limits (Start-End).`, null);
+                                    isValid = false;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                return isValid; 
+            }
+
+            // --- UNIT CONVERTERS ---
+            const converters = {
+                length: {
+                    base: 'mm',
+                    toBase: (v, u) => u === 'inch' ? v * 25.4 : v,
+                    fromBase: (v, u) => u === 'inch' ? v / 25.4 : v
+                },
+                distance: {
+                    base: 'km',
+                    toBase: (v, u) => {
+                        if (u === 'mile') return v * 1.60934;
+                        if (u === 'm') return v / 1000;
+                        return v;
+                    },
+                    fromBase: (v, u) => {
+                        if (u === 'mile') return v / 1.60934;
+                        if (u === 'm') return v * 1000;
+                        return v;
+                    }
+                },
+                flow: {
+                    base: 'base_flow', 
+                    toBase: (v, u) => {
+                        if(currentMode === 'gas') return u === 'mmscfd' ? v * 1179.87 : v;
+                        if(currentMode === 'liquid') return u === 'bblday' ? v * 0.1589873 / 24 : v;
+                        return v;
+                    },
+                    fromBase: (v, u) => {
+                        if(currentMode === 'gas') return u === 'mmscfd' ? v / 1179.87 : v;
+                        if(currentMode === 'liquid') return u === 'bblday' ? v / (0.1589873 / 24) : v;
+                        return v;
+                    }
+                },
+                pressure: {
+                    base: 'kgcm2',
+                    toBase: (v, u) => {
+                        if (u === 'psi') return v * 0.070307;
+                        if (u === 'bar') return v * 1.01972;
+                        return v;
+                    },
+                    fromBase: (v, u) => {
+                        if (u === 'psi') return v / 0.070307;
+                        if (u === 'bar') return v / 1.01972;
+                        return v;
+                    }
+                },
+                temp: {
+                    base: 'c',
+                    toBase: (v, u) => u === 'f' ? (v - 32) * 5/9 : v,
+                    fromBase: (v, u) => u === 'f' ? (v * 9/5) + 32 : v
+                }
+            };
+
+            // --- MODE SWITCH ---
+            window.setMode = function(mode) {
+                currentMode = mode;
+                document.getElementById('btn-mode-gas').className = mode === 'gas' ? 'toggle-btn active' : 'toggle-btn';
+                document.getElementById('btn-mode-liquid').className = mode === 'liquid' ? 'toggle-btn active' : 'toggle-btn';
+                
+                const sel = document.getElementById('sel-flow-unit');
+                sel.innerHTML = '';
+                flowOptions[mode].forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt.val;
+                    o.innerText = opt.label;
+                    sel.appendChild(o);
+                });
+                lastUnits['sel-flow-unit'] = flowOptions[mode][0].val;
+
+                if (mode === 'gas') {
+                    document.getElementById('group-sg').classList.remove('hidden');
+                    document.getElementById('group-visc').classList.add('hidden');
+                    document.getElementById('row-z').classList.remove('hidden');
+                    document.getElementById('row-pavg').classList.remove('hidden');
+                    document.getElementById('label-details').innerText = "Calculation Details (AGA / CNGA)";
+                } else {
+                    document.getElementById('group-sg').classList.add('hidden');
+                    document.getElementById('group-visc').classList.remove('hidden');
+                    document.getElementById('row-z').classList.add('hidden');
+                    document.getElementById('row-pavg').classList.add('hidden');
+                    document.getElementById('label-details').innerText = "Calculation Details (Incompressible)";
+                }
+                calculate();
+            };
+
+            // --- UNIT HANDLERS ---
+            function handleUnitChange(e) {
+                const select = e.target;
+                const type = select.dataset.type;
+                const inputIds = select.dataset.input.split(',');
+                const newUnit = select.value;
+                const oldUnit = lastUnits[select.id];
+
+                if (!oldUnit || !type || newUnit === oldUnit) return;
+                const converter = converters[type];
+
+                inputIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.value !== "") {
+                        let val = parseFloat(el.value);
+                        if (!isNaN(val)) {
+                            const baseVal = converter.toBase(val, oldUnit);
+                            const newVal = converter.fromBase(baseVal, newUnit);
+                            el.value = (Math.abs(newVal) < 0.01 || Math.abs(newVal) > 10000) 
+                                ? newVal.toPrecision(6) / 1 
+                                : parseFloat(newVal.toFixed(4));
+                        }
+                    }
+                });
+                lastUnits[select.id] = newUnit;
+                if(select.id === 'sel-dist-unit') syncDistUnits(newUnit);
+                if(select.id === 'sel-press-unit') syncPressUnits(newUnit);
+                calculate();
+            }
+
+            function getMetricValues() {
+                const rawOd = getVal('inp-od');
+                const rawWt = getVal('inp-wt');
+                const rawStart = getVal('inp-ch-start');
+                const rawEnd = getVal('inp-ch-end');
+                const rawFlow = getVal('inp-flow'); 
+                const rawPin = getVal('inp-pin');
+                const rawPout = getVal('inp-pout');
+                const rawTemp = getVal('inp-temp');
+
+                const unitOd = document.getElementById('sel-od-unit').value;
+                const unitWt = document.getElementById('sel-wt-unit').value;
+                const unitDist = document.getElementById('sel-dist-unit').value;
+                const unitPress = document.getElementById('sel-press-unit').value;
+                const unitTemp = document.getElementById('sel-temp-unit').value;
+
+                return {
+                    odMm: converters.length.toBase(rawOd, unitOd),
+                    wtMm: converters.length.toBase(rawWt, unitWt),
+                    startKm: converters.distance.toBase(rawStart, unitDist),
+                    endKm: converters.distance.toBase(rawEnd, unitDist),
+                    rawFlow,
+                    pinKg: converters.pressure.toBase(rawPin, unitPress),
+                    poutKg: converters.pressure.toBase(rawPout, unitPress),
+                    tempC: converters.temp.toBase(rawTemp, unitTemp)
+                };
+            }
+
+            function syncDistUnits(val) { document.getElementById('lbl-dist-unit-end').innerText = val; }
+            function syncPressUnits(val) {
+                let label = "kg/cm²g";
+                if(val === 'bar') label = "bar g";
+                if(val === 'psi') label = "psig";
+                document.getElementById('lbl-press-unit-out').innerText = label;
+            }
+
+            // --- WAYPOINT LOGIC ---
+            window.addWaypoint = function(name = "", km = "", actual = "") {
+                const id = Date.now() + Math.random().toString(16).slice(2);
+                waypoints.push({ id, name, km, actualTime: actual });
+                renderWaypoints();
+                calculate();
+            }
+
+            window.removeWaypoint = function(id) {
+                waypoints = waypoints.filter(wp => wp.id !== id);
+                renderWaypoints();
+                calculate();
+            }
+
+            window.updateWaypoint = function(id, field, value) {
+                const wp = waypoints.find(w => w.id === id);
+                if(wp) {
+                    wp[field] = value;
+                    calculate();
+                }
+            }
+            
+            // Specialized Clear Function
+            window.clearWaypointTime = function(id) {
+                const wp = waypoints.find(w => w.id === id);
+                if(wp) {
+                    wp.actualTime = ""; 
+                    renderWaypoints();  
+                    calculate();        
+                }
+            }
+
+            function renderWaypoints() {
+                const container = document.getElementById('wp-list');
+                container.innerHTML = "";
+                
+                waypoints.forEach(wp => {
+                    const div = document.createElement('div');
+                    div.className = "wp-item";
+                    div.innerHTML = `
+                        <div class="wp-row-main">
+                            <input type="text" class="wp-input" style="flex:2" placeholder="Name (e.g. SV-01)" 
+                                value="${wp.name || ''}" oninput="updateWaypoint('${wp.id}', 'name', this.value)">
+                            <input type="number" class="wp-input" style="flex:1" placeholder="Loc" 
+                                value="${wp.km || ''}" oninput="updateWaypoint('${wp.id}', 'km', this.value)">
+                            <button class="wp-btn-del" onclick="removeWaypoint('${wp.id}')">&times;</button>
+                        </div>
+                        <div class="wp-row-actual">
+                            <span class="wp-label-small">Actual Arrival</span>
+                            <input type="datetime-local" class="wp-input" style="flex:1; font-size:0.75rem;" 
+                                value="${wp.actualTime || ''}" onchange="updateWaypoint('${wp.id}', 'actualTime', this.value)">
+                            <button class="wp-btn-clear" onclick="clearWaypointTime('${wp.id}')" title="Clear Time">✕</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            // --- MENU & SHARE ---
+            window.toggleMenu = function() {
+                document.getElementById('main-menu').classList.toggle('show');
+            }
+            
+            document.addEventListener('click', function(e) {
+                const menu = document.getElementById('main-menu');
+                const btn = document.querySelector('.btn-menu');
+                if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            window.handleMenuAction = function(action) {
+                document.getElementById('main-menu').classList.remove('show'); 
+                if(action === 'scenario') openModal();
+                if(action === 'share') shareLink();
+                if(action === 'report') printReport();
+            }
+
+            window.shareLink = function() {
+                const params = new URLSearchParams();
+                
+                params.set('mode', currentMode);
+                params.set('od', document.getElementById('inp-od').value);
+                params.set('wt', document.getElementById('inp-wt').value);
+                params.set('start', document.getElementById('inp-ch-start').value);
+                params.set('end', document.getElementById('inp-ch-end').value);
+                params.set('flow', document.getElementById('inp-flow').value);
+                params.set('pin', document.getElementById('inp-pin').value);
+                params.set('pout', document.getElementById('inp-pout').value);
+                params.set('temp', document.getElementById('inp-temp').value);
+                params.set('eff', document.getElementById('inp-eff').value);
+                params.set('ptype', document.getElementById('sel-pig-type').value);
+                
+                if (document.getElementById('inp-sg')) params.set('sg', document.getElementById('inp-sg').value);
+                if (document.getElementById('inp-visc')) params.set('visc', document.getElementById('inp-visc').value);
+                if (document.getElementById('inp-launch')) params.set('launch', document.getElementById('inp-launch').value);
+
+                params.set('u_od', document.getElementById('sel-od-unit').value);
+                params.set('u_wt', document.getElementById('sel-wt-unit').value);
+                params.set('u_dist', document.getElementById('sel-dist-unit').value);
+                params.set('u_flow', document.getElementById('sel-flow-unit').value);
+                params.set('u_p', document.getElementById('sel-press-unit').value);
+                params.set('u_t', document.getElementById('sel-temp-unit').value);
+
+                if (waypoints.length > 0) {
+                    const minWps = waypoints.map(w => [w.name, w.km, w.actualTime]);
+                    params.set('sv', JSON.stringify(minWps));
+                }
+
+                const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+                
+                navigator.clipboard.writeText(url).then(() => {
+                    const toast = document.getElementById("toast");
+                    toast.className = "show";
+                    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+                }).catch(err => {
+                    prompt("Copy this link:", url);
+                });
+            }
+
+            // --- REPORT PRINTING ---
+            window.printReport = function() {
+                document.getElementById('rpt-date').innerText = "Date: " + new Date().toLocaleDateString();
+                document.getElementById('rpt-status').innerText = rptData.status;
+                document.getElementById('rpt-gen-time').innerText = new Date().toLocaleString();
+
+                document.getElementById('rpt-vel').innerText = document.getElementById('out-vel-ms').innerText + " m/s";
+                document.getElementById('rpt-time').innerText = document.getElementById('out-time-hhmm').innerText + " hrs";
+                document.getElementById('rpt-eta').innerText = document.getElementById('out-eta-time').innerText;
+
+                document.getElementById('rpt-od').innerText = document.getElementById('inp-od').value;
+                document.getElementById('rpt-od-u').innerText = document.getElementById('sel-od-unit').value;
+                document.getElementById('rpt-wt').innerText = document.getElementById('inp-wt').value;
+                document.getElementById('rpt-wt-u').innerText = document.getElementById('sel-wt-unit').value;
+                document.getElementById('rpt-id').innerText = document.getElementById('val-id').innerText;
+                document.getElementById('rpt-len').innerText = document.getElementById('val-length').innerText + " km";
+                document.getElementById('rpt-vol').innerText = document.getElementById('out-vol').innerText;
+
+                document.getElementById('rpt-mode').innerText = currentMode;
+                document.getElementById('rpt-flow').innerText = document.getElementById('inp-flow').value;
+                document.getElementById('rpt-flow-u').innerText = document.getElementById('sel-flow-unit').options[document.getElementById('sel-flow-unit').selectedIndex].text;
+                document.getElementById('rpt-pin').innerText = document.getElementById('inp-pin').value;
+                document.getElementById('rpt-pout').innerText = document.getElementById('inp-pout').value;
+                document.getElementById('rpt-p-u').innerText = document.getElementById('lbl-press-unit-out').innerText;
+                document.getElementById('rpt-temp').innerText = document.getElementById('inp-temp').value;
+                document.getElementById('rpt-temp-u').innerText = document.getElementById('sel-temp-unit').options[document.getElementById('sel-temp-unit').selectedIndex].text;
+                
+                const launchRaw = document.getElementById('inp-launch').value;
+                document.getElementById('rpt-launch').innerText = launchRaw ? new Date(launchRaw).toLocaleString() : "--";
+
+                const tbody = document.getElementById('rpt-sv-body');
+                tbody.innerHTML = '';
+                
+                const uiRows = document.querySelectorAll('#wp-result-body tr');
+                if(uiRows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No SV Stations defined.</td></tr>';
+                } else {
+                    uiRows.forEach(row => {
+                        const newRow = row.cloneNode(true);
+                        newRow.cells[0].style.color = "black";
+                        newRow.cells[1].style.color = "black";
+                        newRow.cells[2].style.color = "black";
+                        const span = newRow.cells[2].querySelector('span');
+                        if(span && span.style.color === 'rgb(251, 191, 36)') span.style.color = "#d97706"; 
+                        tbody.appendChild(newRow);
+                    });
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:bold">Receiver</td>
+                    <td>${document.getElementById('inp-ch-end').value} ${document.getElementById('sel-dist-unit').value}</td>
+                    <td>${document.getElementById('out-eta-time').innerText}<br><span style="font-size:0.7em; color:#666">${document.getElementById('out-eta-date').innerText}</span></td>
+                    <td><span class="status-badge status-coming" style="border:1px solid #ccc; color:#444">Target</span></td>
+                `;
+                tbody.appendChild(tr);
+
+                window.print();
+            }
+
+            // --- SCENARIO LOGIC ---
+            window.openModal = function() {
+                document.getElementById('modal-scenarios').style.display = 'flex';
+                renderScenarioList();
+            }
+            window.closeModal = function() {
+                document.getElementById('modal-scenarios').style.display = 'none';
+            }
+
+            window.saveCurrentScenario = function() {
+                const name = document.getElementById('scenario-name').value.trim();
+                if(!name) return alert("Please enter a scenario name");
+
+                const inputs = { mode: currentMode, waypoints: waypoints };
+                document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
+                document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+
+                const newScenario = {
+                    id: Date.now(),
+                    name: name,
+                    date: new Date().toLocaleString(),
+                    data: inputs
+                };
+
+                savedScenarios.push(newScenario);
+                safeStorage.save('pigCalc_scenarios', savedScenarios);
+                
+                document.getElementById('scenario-name').value = '';
+                renderScenarioList();
+            }
+
+            window.loadScenario = function(id) {
+                const sc = savedScenarios.find(s => s.id == id);
+                if(!sc) return;
+                applyData(sc.data);
+                closeModal();
+            }
+
+            window.deleteScenario = function(id) {
+                if(confirm("Delete this scenario?")) {
+                    savedScenarios = savedScenarios.filter(s => s.id != id);
+                    safeStorage.save('pigCalc_scenarios', savedScenarios);
+                    renderScenarioList();
+                }
+            }
+
+            function renderScenarioList() {
+                const list = document.getElementById('list-scenarios');
+                list.innerHTML = '';
+                
+                if(savedScenarios.length === 0) {
+                    list.innerHTML = '<div style="padding:15px; color:#64748b; text-align:center;">No saved scenarios.</div>';
+                    return;
+                }
+
+                savedScenarios.slice().reverse().forEach(sc => {
+                    const div = document.createElement('div');
+                    div.className = 'scenario-item';
+                    div.innerHTML = `
+                        <div class="scenario-info">
+                            <span class="scenario-name">${sc.name}</span>
+                            <span class="scenario-date">${sc.date}</span>
+                        </div>
+                        <div class="scenario-actions">
+                            <button class="btn-action" onclick="loadScenario(${sc.id})">Load</button>
+                            <button class="btn-action" style="border-color:#7f1d1d; color:#f87171" onclick="deleteScenario(${sc.id})">X</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            // --- HELPER: APPLY DATA OBJECT TO UI ---
+            function applyData(data) {
+                if(data.mode) setMode(data.mode);
+                
+                if(Array.isArray(data.waypoints)) {
+                    waypoints = data.waypoints;
+                } else if (data.sv) { // From URL
+                    try {
+                        const raw = JSON.parse(data.sv);
+                        waypoints = raw.map(item => ({
+                            id: Date.now() + Math.random().toString(16).slice(2),
+                            name: item[0],
+                            km: item[1],
+                            actualTime: item[2]
+                        }));
+                    } catch(e) { console.error("SV Parse Error", e); }
+                }
+                renderWaypoints();
+
+                const mappings = {
+                    'inp-od': data.od || data['inp-od'],
+                    'inp-wt': data.wt || data['inp-wt'],
+                    'inp-ch-start': data.start || data['inp-ch-start'],
+                    'inp-ch-end': data.end || data['inp-ch-end'],
+                    'inp-flow': data.flow || data['inp-flow'],
+                    'inp-pin': data.pin || data['inp-pin'],
+                    'inp-pout': data.pout || data['inp-pout'],
+                    'inp-temp': data.temp || data['inp-temp'],
+                    'inp-eff': data.eff || data['inp-eff'],
+                    'sel-pig-type': data.ptype || data['sel-pig-type'], // NEW
+                    'inp-sg': data.sg || data['inp-sg'],
+                    'inp-visc': data.visc || data['inp-visc'],
+                    'inp-launch': data.launch || data['inp-launch'],
+                    
+                    'sel-od-unit': data.u_od || data['sel-od-unit'],
+                    'sel-wt-unit': data.u_wt || data['sel-wt-unit'],
+                    'sel-dist-unit': data.u_dist || data['sel-dist-unit'],
+                    'sel-flow-unit': data.u_flow || data['sel-flow-unit'],
+                    'sel-press-unit': data.u_p || data['sel-press-unit'],
+                    'sel-temp-unit': data.u_t || data['sel-temp-unit']
+                };
+
+                Object.keys(mappings).forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el && mappings[id] !== undefined) {
+                        el.value = mappings[id];
+                        if(id.startsWith('sel-')) {
+                            if(lastUnits.hasOwnProperty(id)) lastUnits[id] = mappings[id];
+                            if(id === 'sel-dist-unit') syncDistUnits(mappings[id]);
+                            if(id === 'sel-press-unit') syncPressUnits(mappings[id]);
+                        }
+                    }
+                });
+                
+                calculate();
+            }
+
+            // --- INIT ---
+            function init() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('mode')) {
+                    const data = {};
+                    for(const [key, value] of params.entries()) {
+                        data[key] = value;
+                    }
+                    setMode(data.mode || 'gas');
+                    setTimeout(() => applyData(data), 50);
+                    return; 
+                }
+
+                const storedScenarios = safeStorage.load('pigCalc_scenarios');
+                if(storedScenarios) savedScenarios = storedScenarios;
+
+                const saved = safeStorage.load('pigCalc_v6');
+                if (saved) {
+                    applyData(saved);
+                } else {
+                    setMode('gas');
+                    const now = new Date();
+                    const oneHourAgo = new Date(now.getTime() - (3600000));
+                    oneHourAgo.setMinutes(oneHourAgo.getMinutes() - oneHourAgo.getTimezoneOffset());
+                    const el = document.getElementById('inp-launch');
+                    if(el) el.value = oneHourAgo.toISOString().slice(0, 16);
+                    calculate();
+                }
+                requestAnimationFrame(animate);
+            }
+
+            // --- CALCULATION ---
+            function calculate() {
+                // 1. CLEAR OLD ERRORS
+                clearValidation();
+
+                const inputs = { mode: currentMode, waypoints: waypoints };
+                document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
+                document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+                safeStorage.save('pigCalc_v6', inputs);
+
+                document.querySelectorAll('.wp-tick').forEach(el => el.remove());
+
+                try {
+                    const vals = getMetricValues();
+
+                    // 2. RUN VALIDATION
+                    if (!runValidation(vals)) {
+                        document.getElementById('out-vel-ms').innerText = "ERR";
+                        document.getElementById('out-eta-time').innerText = "--:--";
+                        return; 
+                    }
+
+                    const { odMm, wtMm, startKm, endKm, rawFlow, pinKg, poutKg, tempC } = vals;
+                    const eff = getVal('inp-eff') / 100;
+                    const distUnit = document.getElementById('sel-dist-unit').value;
+
+                    // Geometry
+                    launcherKm = isNaN(startKm) ? 0 : startKm;
+                    receiverKm = isNaN(endKm) ? 0 : endKm;
+                    pipelineLengthKm = Math.abs(receiverKm - launcherKm);
+
+                    // Labels
+                    const uStart = getVal('inp-ch-start');
+                    const uEnd = getVal('inp-ch-end');
+                    document.getElementById('val-length').innerText = pipelineLengthKm.toFixed(3);
+                    document.getElementById('label-launcher').innerText = `LAUNCHER (${uStart} ${distUnit})`;
+                    document.getElementById('label-receiver').innerText = `RECEIVER (${uEnd} ${distUnit})`;
+
+                    // Area
+                    let areaSqM = 0;
+                    if(!isNaN(odMm) && !isNaN(wtMm)) {
+                        const idMm = odMm - (2 * wtMm);
+                        document.getElementById('val-id').innerHTML = `<strong>${idMm.toFixed(1)}</strong> mm`;
+                        areaSqM = Math.PI * Math.pow((idMm / 1000) / 2, 2);
+                        if(pipelineLengthKm > 0) {
+                            const vol = areaSqM * (pipelineLengthKm * 1000);
+                            document.getElementById('out-vol').innerText = Math.round(vol).toLocaleString();
+                        }
+                    }
+
+                    // --- 1. THEORETICAL VELOCITY (From Flow) ---
+                    let pigVelMs = 0;
+                    let qActM3Day = 0;
+                    let pAvgKg = 0;
+                    let zFactor = 0;
+                    
+                    let usingActuals = false;
+                    let lastConfirmedKm = launcherKm;
+                    let lastConfirmedTime = null;
+
+                    if(!isNaN(rawFlow) && areaSqM > 0 && pipelineLengthKm > 0) {
+                        if (currentMode === 'gas') {
+                            const sg = getVal('inp-sg');
+                            if(!isNaN(pinKg) && !isNaN(poutKg) && !isNaN(tempC) && !isNaN(sg)) {
+                                let flowScmh = rawFlow;
+                                const unitFlow = document.getElementById('sel-flow-unit').value;
+                                if(unitFlow === 'mmscfd') flowScmh = rawFlow * 1179.87;
+
+                                const qStd = flowScmh * SCMH_TO_SCFD;
+                                const pInPsia = (pinKg * KGCM2_TO_PSI) + 14.7;
+                                const pOutPsia = (poutKg * KGCM2_TO_PSI) + 14.7;
+                                const tempR = (tempC * 9/5) + 32 + 460;
+                                const pAvgPsia = (2/3) * (pInPsia + pOutPsia - ((pInPsia * pOutPsia) / (pInPsia + pOutPsia)));
+                                pAvgKg = pAvgPsia / KGCM2_TO_PSI;
+                                const num = (pAvgPsia - 14.7) * 344400 * Math.pow(10, 1.785 * sg);
+                                zFactor = 1 / (1 + (num / Math.pow(tempR, 3.825)));
+                                const qActCfDay = qStd * (STANDARD_PRESSURE_PSIA / pAvgPsia) * (tempR / STANDARD_TEMP_R) * zFactor;
+                                qActM3Day = qActCfDay * CFT_TO_M3;
+                            }
+                        } else {
+                            const unitFlow = document.getElementById('sel-flow-unit').value;
+                            if (unitFlow === 'm3hr') qActM3Day = rawFlow * 24;
+                            else if (unitFlow === 'bblday') qActM3Day = rawFlow * 0.1589873;
+                        }
+
+                        if (qActM3Day > 0) {
+                            pigVelMs = (qActM3Day / 86400 / areaSqM) * eff;
+                        }
+                    }
+
+                    // --- 2. ACTUAL VELOCITY RECALIBRATION ---
+                    const launchVal = document.getElementById('inp-launch').value;
+                    let sortedWps = [];
+
+                    if (launchVal) {
+                        const launchTimeMs = new Date(launchVal).getTime();
+                        lastConfirmedTime = launchTimeMs;
+
+                        sortedWps = waypoints.map(wp => {
+                            let kmVal = parseFloat(wp.km);
+                            kmVal = converters.distance.toBase(kmVal, distUnit);
+                            return { ...wp, kmVal: kmVal };
+                        }).filter(wp => !isNaN(wp.kmVal));
+
+                        sortedWps.sort((a, b) => Math.abs(a.kmVal - launcherKm) - Math.abs(b.kmVal - launcherKm));
+
+                        let bestWp = null;
+                        for (let i = 0; i < sortedWps.length; i++) {
+                            if (sortedWps[i].actualTime) {
+                                bestWp = sortedWps[i];
+                            }
+                        }
+
+                        if (bestWp) {
+                            const actualTimeMs = new Date(bestWp.actualTime).getTime();
+                            const distTraveledKm = Math.abs(bestWp.kmVal - launcherKm);
+                            const timeElapsedMs = actualTimeMs - launchTimeMs;
+
+                            if (distTraveledKm > 0 && timeElapsedMs > 0) {
+                                const realVelMs = (distTraveledKm * 1000) / (timeElapsedMs / 1000);
+                                pigVelMs = realVelMs; 
+                                usingActuals = true;
+                                lastConfirmedKm = bestWp.kmVal;
+                                lastConfirmedTime = actualTimeMs;
+                            }
+                        }
+                    }
+
+                    // --- 3. UI UPDATE ---
+                    const pigVelKmh = pigVelMs * 3.6;
+                    document.getElementById('out-vel-ms').innerText = pigVelMs.toFixed(2);
+                    document.getElementById('out-vel-kmh').innerText = pigVelKmh.toFixed(2);
+                    
+                    const velCard = document.getElementById('card-velocity');
+                    const velLabel = document.getElementById('label-velocity');
+                    if (usingActuals) {
+                        velCard.classList.remove('dash-blue');
+                        velCard.classList.add('dash-amber');
+                        velLabel.innerText = "Velocity (Actual)";
+                    } else {
+                        velCard.classList.remove('dash-amber');
+                        velCard.classList.add('dash-blue');
+                        velLabel.innerText = "Velocity (Calc)";
+                    }
+
+                    if(currentMode === 'gas') {
+                        document.getElementById('out-pavg').innerText = pAvgKg.toFixed(2);
+                        document.getElementById('out-z').innerText = zFactor > 0 ? zFactor.toFixed(4) : "0.000";
+                    }
+                    document.getElementById('out-qact').innerText = Math.round(qActM3Day).toLocaleString();
+
+                    const totalDistKm = Math.abs(receiverKm - launcherKm);
+                    const remDistKm = Math.abs(receiverKm - lastConfirmedKm); 
+                    
+                    if (pigVelMs > 0 && launchVal) {
+                        const remSeconds = (remDistKm * 1000) / pigVelMs;
+                        const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (remSeconds * 1000);
+                        const arrivalDate = new Date(etaMs);
+                        
+                        totalTravelHours = (etaMs - new Date(launchVal).getTime()) / 3600000;
+
+                        document.getElementById('out-eta-time').innerText = arrivalDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                        document.getElementById('out-eta-date').innerText = arrivalDate.toLocaleDateString();
+                        
+                        let h = Math.floor(totalTravelHours);
+                        let m = Math.round((totalTravelHours - h) * 60);
+                        if(m === 60) { m = 0; h++; }
+                        document.getElementById('out-time-hhmm').innerText = `${h}:${m.toString().padStart(2,'0')}`;
+                        document.getElementById('out-time-dec').innerText = totalTravelHours.toFixed(2);
+
+                        const now = new Date();
+                        if (now > arrivalDate) rptData.status = "Completed";
+                        else if (now > new Date(launchVal)) rptData.status = "In Progress";
+                        else rptData.status = "Scheduled";
+
+                    } else {
+                        document.getElementById('out-time-hhmm').innerText = "--:--";
+                        document.getElementById('out-eta-time').innerText = "--:--";
+                        totalTravelHours = 0;
+                        rptData.status = "Planning";
+                    }
+
+                    // --- 4. WAYPOINT / SV LIST UPDATE ---
+                    const wpTableBody = document.getElementById('wp-result-body');
+                    const wpCard = document.getElementById('card-wp-results');
+                    wpTableBody.innerHTML = "";
+
+                    if (sortedWps.length > 0 && pigVelMs > 0 && launchVal) {
+                        wpCard.style.display = 'block';
+                        const now = new Date();
+
+                        sortedWps.forEach(wp => {
+                            const tr = document.createElement('tr');
+                            let statusHtml = '';
+                            let timeDisplay = '';
+
+                            if (wp.actualTime) {
+                                const actDate = new Date(wp.actualTime);
+                                timeDisplay = `<span style="color:#fbbf24">${actDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span><br><span style="font-size:0.7em; color:#64748b">${actDate.toLocaleDateString()}</span>`;
+                                statusHtml = `<span class="status-badge status-confirmed">Confirmed</span>`;
+                            } else {
+                                const distFromLauncher = Math.abs(wp.kmVal - launcherKm);
+                                const distLastConf = Math.abs(lastConfirmedKm - launcherKm);
+                                
+                                if (distFromLauncher < distLastConf) {
+                                    timeDisplay = '--:--';
+                                    statusHtml = `<span class="status-badge" style="color:#64748b; border:1px solid #475569">Passed?</span>`;
+                                } else {
+                                    const distFromLast = Math.abs(wp.kmVal - lastConfirmedKm);
+                                    const secondsFromLast = (distFromLast * 1000) / pigVelMs;
+                                    const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (secondsFromLast * 1000);
+                                    const etaDate = new Date(etaMs);
+                                    
+                                    timeDisplay = `${etaDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}<br><span style="font-size:0.7em; color:#64748b">${etaDate.toLocaleDateString()}</span>`;
+                                    
+                                    const isPassed = now > etaDate;
+                                    statusHtml = `<span class="status-badge ${isPassed ? 'status-passed' : 'status-coming'}">${isPassed ? 'Crossed' : 'ETA'}</span>`;
+                                }
+                            }
+
+                            tr.innerHTML = `
+                                <td style="font-weight:bold; color:white;">${wp.name || 'SV'}</td>
+                                <td class="mono">${wp.km} ${distUnit}</td>
+                                <td class="mono">${timeDisplay}</td>
+                                <td>${statusHtml}</td>
+                            `;
+                            wpTableBody.appendChild(tr);
+
+                            let posPct = (Math.abs(wp.kmVal - launcherKm) / pipelineLengthKm) * 100;
+                            if (posPct >= 0 && posPct <= 100) {
+                                const tick = document.createElement('div');
+                                tick.className = 'wp-tick';
+                                tick.style.left = `${posPct}%`;
+                                tick.setAttribute('data-name', wp.name || wp.km);
+                                if(wp.actualTime) tick.style.background = '#fbbf24'; 
+                                document.getElementById('pipeline-vis').appendChild(tick);
+                            }
+                        });
+
+                    } else {
+                        if (sortedWps.length === 0) wpCard.style.display = 'none';
+                    }
+
+                    // 5. SAFETY CHECK
+                    if (pigVelMs > 5) { // > 5 m/s
+                        addMessage('warn', `High Velocity Warning: ${pigVelMs.toFixed(2)} m/s exceeds standard safety limits.`, null);
+                        document.getElementById('card-velocity').classList.add('dash-amber'); 
+                    }
+
+                    const safeVel = pigVelMs > 0 ? pigVelMs : 0.5;
+                    const dur = Math.max(0.2, 2 - (safeVel * 0.2));
+                    document.getElementById('flow-anim').style.animationDuration = `${dur}s`;
+
+                } catch(e) { console.error(e); }
+            }
+
+            // --- ANIMATION ---
+            function animate() {
+                const launchVal = document.getElementById('inp-launch').value;
+                const container = document.getElementById('pig-anim');
+                const statusTxt = document.getElementById('pig-status-text');
+                const badge = document.getElementById('pig-chainage-badge');
+                const progTxt = document.getElementById('progress-text');
+                const distUnit = document.getElementById('sel-dist-unit').value; 
+
+                if(!launchVal || totalTravelHours <= 0) {
+                    container.style.left = "0%";
+                    container.style.transform = "translate(0%, -50%)";
+                    statusTxt.innerText = "Ready";
+                    const uStart = getVal('inp-ch-start') || 0;
+                    badge.innerText = `${uStart.toFixed(3)} ${distUnit}`;
+                    requestAnimationFrame(animate);
+                    return;
+                }
+
+                const now = new Date().getTime();
+                const launch = new Date(launchVal).getTime();
+                const duration = totalTravelHours * 3600000;
+                const elapsed = now - launch;
+
+                let pct = 0;
+                let curKm = 0;
+
+                if(elapsed < 0) {
+                    pct = 0;
+                    curKm = launcherKm;
+                    statusTxt.innerText = "Scheduled";
+                    statusTxt.style.color = "#60a5fa";
+                } else if (elapsed >= duration) {
+                    pct = 100;
+                    curKm = receiverKm;
+                    statusTxt.innerText = "Arrived";
+                    statusTxt.style.color = "#34d399";
+                } else {
+                    pct = (elapsed / duration) * 100;
+                    curKm = launcherKm + ((receiverKm - launcherKm) * (pct / 100));
+                    statusTxt.innerText = "In Transit";
+                    statusTxt.style.color = "#facc15";
+                }
+
+                container.style.left = `${pct}%`;
+                container.style.transform = "translate(-50%, -50%)";
+                
+                let curUserUnit = converters.distance.fromBase(curKm, distUnit);
+                badge.innerText = `${curUserUnit.toFixed(3)} ${distUnit}`;
+                progTxt.innerText = `${pct.toFixed(1)}%`;
+
+                requestAnimationFrame(animate);
+            }
+
+            // --- LISTENERS ---
+            init();
+            document.querySelectorAll('.calc-trigger').forEach(el => {
+                el.addEventListener('input', calculate);
+                el.addEventListener('change', calculate);
+            });
+            document.querySelectorAll('.unit-change-trigger').forEach(el => {
+                el.addEventListener('change', handleUnitChange);
+            });
+        });
+    </script>
+</body>
+</html>
