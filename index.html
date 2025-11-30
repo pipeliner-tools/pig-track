@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pig Velocity & ETA Calculator (v2.3)</title>
+    <title>Pig Velocity & ETA Calculator (v2.4)</title>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -221,7 +221,7 @@
         .modern-select:hover { background-color: #334155; color: white; }
         .modern-select:focus { outline: none; background-color: #334155; color: white; }
 
-        /* --- NEW: PRIMARY FULL-WIDTH SELECTOR STYLE --- */
+        /* --- PRIMARY FULL-WIDTH SELECTOR STYLE --- */
         .select-primary {
             flex: 1;
             width: 100%;
@@ -1691,6 +1691,8 @@
                     }
                     setMode(data.mode || 'gas');
                     setTimeout(() => applyData(data), 50);
+                    // FIXED: Ensure Animation Starts for Shared Links
+                    requestAnimationFrame(animate); 
                     return; 
                 }
 
