@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pig Velocity & ETA Calculator (v2.4)</title>
+    <title>Pig Velocity & ETA Calculator</title>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -611,6 +611,43 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         @keyframes flowScroll { from { background-position: 0 0; } to { background-position: 20px 0; } }
+
+/* --- COPYRIGHT SCROLL ANIMATION (bottom-only, no weird scroll) --- */
+#copyright-scroll {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 6px 0 10px;
+    margin-top: 35px;          /* space above footer */
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-family: monospace;
+    overflow: hidden;          /* keeps animation from affecting page scroll */
+}
+
+#copyright-scroll .copyright-inner {
+    display: inline-block;
+    padding-left: 100%;        /* start just off the right side */
+    white-space: nowrap;
+    animation: scrollText 18s linear infinite;
+    opacity: 0.75;
+}
+
+@keyframes scrollText {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Hide footer in print view */
+@media print {
+    #copyright-scroll {
+        display: none !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -656,7 +693,7 @@
                     <div class="input-group">
                         <label>Outer Diameter</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-od" class="input-field calc-trigger" value="36" step="0.1">
+                            <input type="number" id="inp-od" class="input-field calc-trigger" value="36" min="2" max="72" step="0.01">
                             <select id="sel-od-unit" class="modern-select unit-change-trigger" data-input="inp-od" data-type="length">
                                 <option value="inch">inch</option>
                                 <option value="mm">mm</option>
@@ -666,7 +703,7 @@
                     <div class="input-group">
                         <label>Wall Thickness</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-wt" class="input-field calc-trigger" value="12.7" step="0.1">
+                            <input type="number" id="inp-wt" class="input-field calc-trigger" value="12.7" min="5" max="50" step="0.1">
                             <select id="sel-wt-unit" class="modern-select unit-change-trigger" data-input="inp-wt" data-type="length">
                                 <option value="mm">mm</option>
                                 <option value="inch">inch</option>
@@ -683,7 +720,7 @@
                     <div class="input-group">
                         <label>Launcher Chainage</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-ch-start" class="input-field calc-trigger" value="0.0" step="0.1">
+                            <input type="number" id="inp-ch-start" class="input-field calc-trigger" value="0.0" min="0" max="2500" step="0.001">
                             <select id="sel-dist-unit" class="modern-select unit-change-trigger" data-input="inp-ch-start,inp-ch-end" data-type="distance">
                                 <option value="km">km</option>
                                 <option value="mile">mile</option>
@@ -694,7 +731,7 @@
                     <div class="input-group">
                         <label>Receiver Chainage</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-ch-end" class="input-field calc-trigger" value="80.3" step="0.1">
+                            <input type="number" id="inp-ch-end" class="input-field calc-trigger" value="80.3" min="0" max="2500" step="0.001">
                             <div class="unit-label-static" id="lbl-dist-unit-end">km</div>
                         </div>
                     </div>
@@ -719,7 +756,7 @@
                 <div class="input-group">
                     <label>Flow Rate</label>
                     <div class="input-wrapper">
-                        <input type="number" id="inp-flow" class="input-field calc-trigger" value="300000" step="1000">
+                        <input type="number" id="inp-flow" class="input-field calc-trigger" value="300000" min="0" max="2000000" step="1000">
                         <select id="sel-flow-unit" class="modern-select unit-change-trigger" data-input="inp-flow" data-type="flow">
                             <!-- Populated dynamically via JS -->
                         </select>
@@ -729,7 +766,7 @@
                     <div class="input-group">
                         <label>Inlet Pressure</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-pin" class="input-field calc-trigger" value="56" step="1">
+                            <input type="number" id="inp-pin" class="input-field calc-trigger" value="56" min="0" max="300" step="0.01">
                             <select id="sel-press-unit" class="modern-select unit-change-trigger" data-input="inp-pin,inp-pout" data-type="pressure">
                                 <option value="kgcm2">kg/cm²g</option>
                                 <option value="bar">bar g</option>
@@ -740,7 +777,7 @@
                     <div class="input-group">
                         <label>Outlet Pressure</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-pout" class="input-field calc-trigger" value="55" step="1">
+                            <input type="number" id="inp-pout" class="input-field calc-trigger" value="55" min="0" max="300" step="0.01">
                             <div class="unit-label-static" id="lbl-press-unit-out">kg/cm²g</div>
                         </div>
                     </div>
@@ -749,7 +786,7 @@
                     <div class="input-group">
                         <label>Temperature</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-temp" class="input-field calc-trigger" value="22" step="1">
+                            <input type="number" id="inp-temp" class="input-field calc-trigger" value="22" min="0" max="150" step="0.1">
                             <select id="sel-temp-unit" class="modern-select unit-change-trigger" data-input="inp-temp" data-type="temp">
                                 <option value="c">°C</option>
                                 <option value="f">°F</option>
@@ -761,7 +798,7 @@
                     <div class="input-group" id="group-sg">
                         <label>Specific Gravity</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-sg" class="input-field calc-trigger" value="0.60" step="0.01">
+                            <input type="number" id="inp-sg" class="input-field calc-trigger" value="0.60" min="0.5" max="2.0" step="0.01">
                         </div>
                     </div>
                     
@@ -769,7 +806,7 @@
                     <div class="input-group hidden" id="group-visc">
                         <label>Viscosity (cP)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-visc" class="input-field calc-trigger" value="1.0" step="0.1">
+                            <input type="number" id="inp-visc" class="input-field calc-trigger" value="1.0" min="0.1" max="5000" step="0.1">
                         </div>
                     </div>
                 </div>
@@ -804,7 +841,7 @@
                         <label>Sealing Eff. (%)</label>
                         <div class="input-wrapper">
                             <input type="number" id="inp-eff" class="input-field calc-trigger"
-                                   value="99" max="100" min="50" step="0.1"
+                                   value="99" max="100" min="10" step="0.1"
                                    oninput="document.getElementById('sel-pig-type').value='custom'">
                         </div>
                     </div>
@@ -1038,421 +1075,620 @@
             Report generated at <span id="rpt-gen-time"></span>. All calculations are theoretical estimates unless actual times are provided.
         </div>
     </div>
-
     <script>
-        // --- GLOBAL VARIABLES ---
-        let currentMode = 'gas'; 
-        let waypoints = []; // Array of {id, name, km, actualTime}
-        let savedScenarios = []; // Array of {id, name, date, data}
+    // --- GLOBAL VARIABLES ---
+    let currentMode = 'gas'; 
+    let waypoints = []; // Array of {id, name, km, actualTime}
+    let savedScenarios = []; // Array of {id, name, date, data}
 
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- CONSTANTS & HELPERS ---
-            const SCMH_TO_SCFD = 35.3147 * 24; 
-            const CFT_TO_M3 = 0.0283168;
-            const KGCM2_TO_PSI = 14.2233;
-            const STANDARD_PRESSURE_PSIA = 14.7;
-            const STANDARD_TEMP_R = 520;
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- CONSTANTS & HELPERS ---
+        const SCMH_TO_SCFD = 35.3147 * 24; 
+        const CFT_TO_M3 = 0.0283168;
+        const KGCM2_TO_PSI = 14.2233;
+        const STANDARD_PRESSURE_PSIA = 14.7;
+        const STANDARD_TEMP_R = 520;
 
-            let totalTravelHours = 0;
-            let pipelineLengthKm = 0;
-            let launcherKm = 0;
-            let receiverKm = 0;
-            
-            // To pass data to report
-            let rptData = {
-                vel: 0, etaDate: null, status: 'Ready'
-            };
+        let totalTravelHours = 0;
+        let pipelineLengthKm = 0;
+        let launcherKm = 0;
+        let receiverKm = 0;
+        
+        // To pass data to report
+        let rptData = {
+            vel: 0, etaDate: null, status: 'Ready'
+        };
 
-            const lastUnits = {
-                'sel-od-unit': 'inch',
-                'sel-wt-unit': 'mm',
-                'sel-dist-unit': 'km',
-                'sel-flow-unit': 'scmh',
-                'sel-press-unit': 'kgcm2',
-                'sel-temp-unit': 'c'
-            };
+        const lastUnits = {
+            'sel-od-unit': 'inch',
+            'sel-wt-unit': 'mm',
+            'sel-dist-unit': 'km',
+            'sel-flow-unit': 'scmh',
+            'sel-press-unit': 'kgcm2',
+            'sel-temp-unit': 'c'
+        };
 
-            const flowOptions = {
-                gas: [{val: 'scmh', label: 'SCMH'}, {val: 'mmscfd', label: 'MMSCFD'}],
-                liquid: [{val: 'm3hr', label: 'm³/hr'}, {val: 'bblday', label: 'bbl/day'}]
-            };
-            
-            // NEW: PIG PRESETS
-            const pigPresets = {
-                'smart': 99.5,
-                'bidi': 99.0,
-                'cup': 97.0,
-                'sphere': 95.0,
-                'foam-h': 92.0,
-                'foam-l': 88.0
-            };
+        const flowOptions = {
+            gas: [{val: 'scmh', label: 'SCMH'}, {val: 'mmscfd', label: 'MMSCFD'}],
+            liquid: [{val: 'm3hr', label: 'm³/hr'}, {val: 'bblday', label: 'bbl/day'}]
+        };
+        
+        // NEW: PIG PRESETS
+        const pigPresets = {
+            'smart': 99.5,
+            'bidi': 99.0,
+            'cup': 97.0,
+            'sphere': 95.0,
+            'foam-h': 92.0,
+            'foam-l': 88.0
+        };
 
-            const safeStorage = {
-                save: function(key, data) {
-                    try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
-                },
-                load: function(key) {
-                    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
-                }
-            };
-
-            function getVal(id) {
-                const el = document.getElementById(id);
-                return el ? parseFloat(el.value) : NaN;
+        const safeStorage = {
+            save: function(key, data) {
+                try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+            },
+            load: function(key) {
+                try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
             }
-            
-            // PIG SELECT LISTENER
-            const pigSelect = document.getElementById('sel-pig-type');
-            const effInput = document.getElementById('inp-eff');
-            if(pigSelect && effInput) {
-                pigSelect.addEventListener('change', function() {
-                    const type = this.value;
-                    if(type !== 'custom' && pigPresets[type]) {
-                        effInput.value = pigPresets[type];
-                        effInput.style.color = '#34d399'; // Flash Green
-                        setTimeout(() => effInput.style.color = 'white', 300);
-                        calculate();
-                    }
-                });
-            }
+        };
 
-            // --- VALIDATION HELPERS ---
-            function clearValidation() {
-                // Clear global messages
-                const consoleEl = document.getElementById('validation-console');
-                consoleEl.innerHTML = '';
-                consoleEl.style.display = 'none';
-
-                // Remove red/amber borders from all inputs
-                document.querySelectorAll('.input-field, .wp-input').forEach(el => {
-                    el.classList.remove('input-error', 'input-warning');
-                });
-            }
-
-            function addMessage(type, text, targetInputId = null) {
-                const consoleEl = document.getElementById('validation-console');
-                consoleEl.style.display = 'flex';
-
-                const div = document.createElement('div');
-                div.className = `msg-box ${type === 'error' ? 'msg-error' : 'msg-warn'}`;
-                div.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i> ${text}`;
-                consoleEl.appendChild(div);
-
-                if (targetInputId) {
-                    const el = document.getElementById(targetInputId);
-                    if(el) el.classList.add(type === 'error' ? 'input-error' : 'input-warning');
-                }
-            }
-
-            // --- VALIDATION LOGIC ---
-            function runValidation(vals) {
-                let isValid = true;
-                
-                // 1. GEOMETRY CHECK: Wall Thickness vs OD
-                const idMm = vals.odMm - (2 * vals.wtMm);
-                if (idMm <= 0) {
-                    addMessage('error', `Invalid Geometry: Wall thickness (${vals.wtMm.toFixed(1)}mm) is too large for OD (${vals.odMm.toFixed(1)}mm).`, 'inp-wt');
-                    document.getElementById('inp-od').classList.add('input-error');
-                    isValid = false; 
-                }
-
-                // 2. LENGTH CHECK
-                if (Math.abs(vals.endKm - vals.startKm) < 0.001) {
-                    addMessage('error', 'Invalid Length: Launcher and Receiver coordinates cannot be the same.', 'inp-ch-end');
-                    isValid = false;
-                }
-
-                // 3. PRESSURE LOGIC (Warning only)
-                if (vals.pinKg < vals.poutKg) {
-                    addMessage('warn', 'Outlet Pressure is higher than Inlet Pressure. Verify inputs.', 'inp-pin');
-                    document.getElementById('inp-pout').classList.add('input-warning');
-                }
-
-                // 4. TIMELINE & LOCATION LOGIC
-                const launchVal = document.getElementById('inp-launch').value;
-                const now = new Date().getTime();
-                const distUnit = document.getElementById('sel-dist-unit').value;
-                
-                // Bounds for SV Station
-                const startKm = vals.startKm;
-                const endKm = vals.endKm;
-                const minKm = Math.min(startKm, endKm);
-                const maxKm = Math.max(startKm, endKm);
-
-                if (launchVal) {
-                    const launchTime = new Date(launchVal).getTime();
-                    
-                    waypoints.forEach(wp => {
-                        // A. Time Logic
-                        if (wp.actualTime) {
-                            const svTime = new Date(wp.actualTime).getTime();
-                            
-                            // Check: Arrival before Launch
-                            if (svTime <= launchTime) {
-                                addMessage('error', `Time Paradox: Station '${wp.name || 'SV'}' marked as arrived before Launch Time.`, null);
-                                isValid = false;
-                            }
-                            
-                            // Check: Future Time
-                            if (svTime > now) {
-                                addMessage('error', `Future Date Error: Station '${wp.name || 'SV'}' actual arrival time cannot be in the future.`, null);
-                                isValid = false;
-                            }
-                        }
-
-                        // B. Location Logic
-                        if (wp.km !== "") {
-                            let wpKm = parseFloat(wp.km);
-                            if(!isNaN(wpKm)) {
-                                // Convert raw input to base KM for comparison
-                                const wpKmBase = converters.distance.toBase(wpKm, distUnit);
-                                
-                                // Allow small float tolerance
-                                if((wpKmBase < minKm - 0.1) || (wpKmBase > maxKm + 0.1)) {
-                                    addMessage('error', `Location Error: Station '${wp.name || 'SV'}' (${wp.km}) is outside the pipeline limits (Start-End).`, null);
-                                    isValid = false;
-                                }
-                            }
-                        }
-                    });
-                }
-
-                return isValid; 
-            }
-
-            // --- UNIT CONVERTERS ---
-            const converters = {
-                length: {
-                    base: 'mm',
-                    toBase: (v, u) => u === 'inch' ? v * 25.4 : v,
-                    fromBase: (v, u) => u === 'inch' ? v / 25.4 : v
-                },
-                distance: {
-                    base: 'km',
-                    toBase: (v, u) => {
-                        if (u === 'mile') return v * 1.60934;
-                        if (u === 'm') return v / 1000;
-                        return v;
-                    },
-                    fromBase: (v, u) => {
-                        if (u === 'mile') return v / 1.60934;
-                        if (u === 'm') return v * 1000;
-                        return v;
-                    }
-                },
-                flow: {
-                    base: 'base_flow', 
-                    toBase: (v, u) => {
-                        if(currentMode === 'gas') return u === 'mmscfd' ? v * 1179.87 : v;
-                        if(currentMode === 'liquid') return u === 'bblday' ? v * 0.1589873 / 24 : v;
-                        return v;
-                    },
-                    fromBase: (v, u) => {
-                        if(currentMode === 'gas') return u === 'mmscfd' ? v / 1179.87 : v;
-                        if(currentMode === 'liquid') return u === 'bblday' ? v / (0.1589873 / 24) : v;
-                        return v;
-                    }
-                },
-                pressure: {
-                    base: 'kgcm2',
-                    toBase: (v, u) => {
-                        if (u === 'psi') return v * 0.070307;
-                        if (u === 'bar') return v * 1.01972;
-                        return v;
-                    },
-                    fromBase: (v, u) => {
-                        if (u === 'psi') return v / 0.070307;
-                        if (u === 'bar') return v / 1.01972;
-                        return v;
-                    }
-                },
-                temp: {
-                    base: 'c',
-                    toBase: (v, u) => u === 'f' ? (v - 32) * 5/9 : v,
-                    fromBase: (v, u) => u === 'f' ? (v * 9/5) + 32 : v
-                }
-            };
-
-            // --- MODE SWITCH ---
-            window.setMode = function(mode) {
-                currentMode = mode;
-                document.getElementById('btn-mode-gas').className = mode === 'gas' ? 'toggle-btn active' : 'toggle-btn';
-                document.getElementById('btn-mode-liquid').className = mode === 'liquid' ? 'toggle-btn active' : 'toggle-btn';
-                
-                const sel = document.getElementById('sel-flow-unit');
-                sel.innerHTML = '';
-                flowOptions[mode].forEach(opt => {
-                    const o = document.createElement('option');
-                    o.value = opt.val;
-                    o.innerText = opt.label;
-                    sel.appendChild(o);
-                });
-                lastUnits['sel-flow-unit'] = flowOptions[mode][0].val;
-
-                if (mode === 'gas') {
-                    document.getElementById('group-sg').classList.remove('hidden');
-                    document.getElementById('group-visc').classList.add('hidden');
-                    document.getElementById('row-z').classList.remove('hidden');
-                    document.getElementById('row-pavg').classList.remove('hidden');
-                    document.getElementById('label-details').innerText = "Calculation Details (AGA / CNGA)";
-                } else {
-                    document.getElementById('group-sg').classList.add('hidden');
-                    document.getElementById('group-visc').classList.remove('hidden');
-                    document.getElementById('row-z').classList.add('hidden');
-                    document.getElementById('row-pavg').classList.add('hidden');
-                    document.getElementById('label-details').innerText = "Calculation Details (Incompressible)";
-                }
-                calculate();
-            };
-
-            // --- UNIT HANDLERS ---
-            function handleUnitChange(e) {
-                const select = e.target;
-                const type = select.dataset.type;
-                const inputIds = select.dataset.input.split(',');
-                const newUnit = select.value;
-                const oldUnit = lastUnits[select.id];
-
-                if (!oldUnit || !type || newUnit === oldUnit) return;
-                const converter = converters[type];
-
-                inputIds.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el && el.value !== "") {
-                        let val = parseFloat(el.value);
-                        if (!isNaN(val)) {
-                            const baseVal = converter.toBase(val, oldUnit);
-                            const newVal = converter.fromBase(baseVal, newUnit);
-                            el.value = (Math.abs(newVal) < 0.01 || Math.abs(newVal) > 10000) 
-                                ? newVal.toPrecision(6) / 1 
-                                : parseFloat(newVal.toFixed(4));
-                        }
-                    }
-                });
-                lastUnits[select.id] = newUnit;
-                if(select.id === 'sel-dist-unit') syncDistUnits(newUnit);
-                if(select.id === 'sel-press-unit') syncPressUnits(newUnit);
-                calculate();
-            }
-
-            function getMetricValues() {
-                const rawOd = getVal('inp-od');
-                const rawWt = getVal('inp-wt');
-                const rawStart = getVal('inp-ch-start');
-                const rawEnd = getVal('inp-ch-end');
-                const rawFlow = getVal('inp-flow'); 
-                const rawPin = getVal('inp-pin');
-                const rawPout = getVal('inp-pout');
-                const rawTemp = getVal('inp-temp');
-
-                const unitOd = document.getElementById('sel-od-unit').value;
-                const unitWt = document.getElementById('sel-wt-unit').value;
-                const unitDist = document.getElementById('sel-dist-unit').value;
-                const unitPress = document.getElementById('sel-press-unit').value;
-                const unitTemp = document.getElementById('sel-temp-unit').value;
-
-                return {
-                    odMm: converters.length.toBase(rawOd, unitOd),
-                    wtMm: converters.length.toBase(rawWt, unitWt),
-                    startKm: converters.distance.toBase(rawStart, unitDist),
-                    endKm: converters.distance.toBase(rawEnd, unitDist),
-                    rawFlow,
-                    pinKg: converters.pressure.toBase(rawPin, unitPress),
-                    poutKg: converters.pressure.toBase(rawPout, unitPress),
-                    tempC: converters.temp.toBase(rawTemp, unitTemp)
-                };
-            }
-
-            function syncDistUnits(val) { document.getElementById('lbl-dist-unit-end').innerText = val; }
-            function syncPressUnits(val) {
-                let label = "kg/cm²g";
-                if(val === 'bar') label = "bar g";
-                if(val === 'psi') label = "psig";
-                document.getElementById('lbl-press-unit-out').innerText = label;
-            }
-
-            // --- WAYPOINT LOGIC ---
-            window.addWaypoint = function(name = "", km = "", actual = "") {
-                const id = Date.now() + Math.random().toString(16).slice(2);
-                waypoints.push({ id, name, km, actualTime: actual });
-                renderWaypoints();
-                calculate();
-            }
-
-            window.removeWaypoint = function(id) {
-                waypoints = waypoints.filter(wp => wp.id !== id);
-                renderWaypoints();
-                calculate();
-            }
-
-            window.updateWaypoint = function(id, field, value) {
-                const wp = waypoints.find(w => w.id === id);
-                if(wp) {
-                    wp[field] = value;
+        function getVal(id) {
+            const el = document.getElementById(id);
+            return el ? parseFloat(el.value) : NaN;
+        }
+        
+        // PIG SELECT LISTENER
+        const pigSelect = document.getElementById('sel-pig-type');
+        const effInput = document.getElementById('inp-eff');
+        if(pigSelect && effInput) {
+            pigSelect.addEventListener('change', function() {
+                const type = this.value;
+                if(type !== 'custom' && pigPresets[type]) {
+                    effInput.value = pigPresets[type];
+                    effInput.style.color = '#34d399'; // Flash Green
+                    setTimeout(() => effInput.style.color = 'white', 300);
                     calculate();
                 }
+            });
+        }
+
+        // --- VALIDATION HELPERS ---
+        function clearValidation() {
+            // Clear global messages
+            const consoleEl = document.getElementById('validation-console');
+            consoleEl.innerHTML = '';
+            consoleEl.style.display = 'none';
+
+            // Remove red/amber borders from all inputs
+            document.querySelectorAll('.input-field, .wp-input').forEach(el => {
+                el.classList.remove('input-error', 'input-warning');
+            });
+        }
+
+        function addMessage(type, text, targetInputId = null) {
+            const consoleEl = document.getElementById('validation-console');
+            consoleEl.style.display = 'flex';
+
+            const div = document.createElement('div');
+            div.className = `msg-box ${type === 'error' ? 'msg-error' : 'msg-warn'}`;
+            div.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i> ${text}`;
+            consoleEl.appendChild(div);
+
+            if (targetInputId) {
+                const el = document.getElementById(targetInputId);
+                if(el) el.classList.add(type === 'error' ? 'input-error' : 'input-warning');
             }
+        }
+
+        // --- VALIDATION LOGIC ---
+        function runValidation(vals) {
+            let isValid = true;
             
-            // Specialized Clear Function
-            window.clearWaypointTime = function(id) {
-                const wp = waypoints.find(w => w.id === id);
-                if(wp) {
-                    wp.actualTime = ""; 
-                    renderWaypoints();  
-                    calculate();        
-                }
+            // 1. GEOMETRY CHECK: Wall Thickness vs OD
+            const idMm = vals.odMm - (2 * vals.wtMm);
+            if (idMm <= 0) {
+                addMessage('error', `Invalid Geometry: Wall thickness (${vals.wtMm.toFixed(1)}mm) is too large for OD (${vals.odMm.toFixed(1)}mm).`, 'inp-wt');
+                document.getElementById('inp-od').classList.add('input-error');
+                isValid = false; 
             }
 
-            function renderWaypoints() {
-                const container = document.getElementById('wp-list');
-                container.innerHTML = "";
-                
+            // 2. LENGTH CHECK
+            if (Math.abs(vals.endKm - vals.startKm) < 0.001) {
+                addMessage('error', 'Invalid Length: Launcher and Receiver coordinates cannot be the same.', 'inp-ch-end');
+                isValid = false;
+            }
+
+            // 3. PRESSURE LOGIC (Warning only)
+            if (vals.pinKg < vals.poutKg) {
+                addMessage('warn', 'Outlet Pressure is higher than Inlet Pressure. Verify inputs.', 'inp-pin');
+                document.getElementById('inp-pout').classList.add('input-warning');
+            }
+
+            // 4. FLOW CHECK
+            const rawFlow = vals.rawFlow;
+            if (isNaN(rawFlow) || rawFlow <= 0) {
+                addMessage('error', 'Flow Rate must be greater than zero.', 'inp-flow');
+                isValid = false;
+            }
+
+            // 5. TEMPERATURE CHECK (just NaN handling; ranges enforced elsewhere)
+            if (isNaN(vals.tempC)) {
+                addMessage('error', 'Temperature must be a valid number.', 'inp-temp');
+                isValid = false;
+            }
+
+            // 6. WAYPOINT LOGIC (Location & Time Consistency)
+            const launchVal = document.getElementById('inp-launch').value;
+            const distUnit = document.getElementById('sel-dist-unit').value;
+            const startKm = vals.startKm;
+            const endKm = vals.endKm;
+            const minKm = Math.min(startKm, endKm);
+            const maxKm = Math.max(startKm, endKm);
+
+            if (launchVal) {
+                const launchTime = new Date(launchVal).getTime();
+                const now = new Date().getTime();
+
                 waypoints.forEach(wp => {
-                    const div = document.createElement('div');
-                    div.className = "wp-item";
-                    div.innerHTML = `
-                        <div class="wp-row-main">
-                            <input type="text" class="wp-input" style="flex:2" placeholder="Name (e.g. SV-01)" 
-                                value="${wp.name || ''}" oninput="updateWaypoint('${wp.id}', 'name', this.value)">
-                            <input type="number" class="wp-input" style="flex:1" placeholder="Loc" 
-                                value="${wp.km || ''}" oninput="updateWaypoint('${wp.id}', 'km', this.value)">
-                            <button class="wp-btn-del" onclick="removeWaypoint('${wp.id}')">&times;</button>
-                        </div>
-                        <div class="wp-row-actual">
-                            <span class="wp-label-small">Actual Arrival</span>
-                            <input type="datetime-local" class="wp-input" style="flex:1; font-size:0.75rem;" 
-                                value="${wp.actualTime || ''}" onchange="updateWaypoint('${wp.id}', 'actualTime', this.value)">
-                            <button class="wp-btn-clear" onclick="clearWaypointTime('${wp.id}')" title="Clear Time">✕</button>
-                        </div>
-                    `;
-                    container.appendChild(div);
+                    // A. Time Logic
+                    if (wp.actualTime) {
+                        const svTime = new Date(wp.actualTime).getTime();
+                        
+                        // Check: Arrival before Launch
+                        if (svTime <= launchTime) {
+                            addMessage('error', `Time Paradox: Station '${wp.name || 'SV'}' marked as arrived before Launch Time.`, null);
+                            isValid = false;
+                        }
+                        
+                        // Check: Future Time
+                        if (svTime > now) {
+                            addMessage('error', `Future Date Error: Station '${wp.name || 'SV'}' actual arrival time cannot be in the future.`, null);
+                            isValid = false;
+                        }
+                    }
+
+                    // B. Location Logic
+                    if (wp.km !== "") {
+                        let wpKm = parseFloat(wp.km);
+                        if(!isNaN(wpKm)) {
+                            // Convert raw input to base KM for comparison
+                            const wpKmBase = converters.distance.toBase(wpKm, distUnit);
+                            
+                            // Allow small float tolerance
+                            if((wpKmBase < minKm - 0.1) || (wpKmBase > maxKm + 0.1)) {
+                                addMessage('error', `Location Error: Station '${wp.name || 'SV'}' (${wp.km}) is outside the pipeline limits (Start-End).`, null);
+                                isValid = false;
+                            }
+                        }
+                    }
                 });
             }
 
-            // --- MENU & SHARE ---
-            window.toggleMenu = function() {
-                document.getElementById('main-menu').classList.toggle('show');
+            return isValid; 
+        }
+
+        // --- UNIT CONVERTERS ---
+        const converters = {
+            length: {
+                base: 'mm',
+                toBase: (v, u) => u === 'inch' ? v * 25.4 : v,
+                fromBase: (v, u) => u === 'inch' ? v / 25.4 : v
+            },
+            distance: {
+                base: 'km',
+                toBase: (v, u) => {
+                    if (u === 'mile') return v * 1.60934;
+                    if (u === 'm') return v / 1000;
+                    return v;
+                },
+                fromBase: (v, u) => {
+                    if (u === 'mile') return v / 1.60934;
+                    if (u === 'm') return v * 1000;
+                    return v;
+                }
+            },
+            flow: {
+                base: 'base_flow', 
+                toBase: (v, u) => {
+                    if(currentMode === 'gas') return u === 'mmscfd' ? v * 1179.87 : v; // base ~ SCMH-equivalent
+                    if(currentMode === 'liquid') return u === 'bblday' ? v * 0.1589873 / 24 : v; // base ~ m3/hr-equivalent
+                    return v;
+                },
+                fromBase: (v, u) => {
+                    if(currentMode === 'gas') return u === 'mmscfd' ? v / 1179.87 : v;
+                    if(currentMode === 'liquid') return u === 'bblday' ? v / (0.1589873 / 24) : v;
+                    return v;
+                }
+            },
+            pressure: {
+                base: 'kgcm2',
+                toBase: (v, u) => {
+                    if (u === 'psi') return v * 0.070307;
+                    if (u === 'bar') return v * 1.01972;
+                    return v;
+                },
+                fromBase: (v, u) => {
+                    if (u === 'psi') return v / 0.070307;
+                    if (u === 'bar') return v / 1.01972;
+                    return v;
+                }
+            },
+            temp: {
+                base: 'c',
+                toBase: (v, u) => u === 'f' ? (v - 32) * 5/9 : v,
+                fromBase: (v, u) => u === 'f' ? (v * 9/5) + 32 : v
             }
+        };
+
+        // --- RANGE CONFIG & CLAMPING ---
+
+        // Limits are defined in the *current input unit* where possible.
+        const rangeConfig = {
+            // Outer Diameter: 2 in – 72 in
+            'inp-od': {
+                getMin() {
+                    const u = document.getElementById('sel-od-unit').value;
+                    return u === 'inch' ? 2 : 2 * 25.4; // 50.8 mm
+                },
+                getMax() {
+                    const u = document.getElementById('sel-od-unit').value;
+                    return u === 'inch' ? 72 : 72 * 25.4; // 1828.8 mm
+                },
+                safeMin() {
+                    const u = document.getElementById('sel-od-unit').value;
+                    return u === 'inch' ? 2 : 2 * 25.4;
+                }
+            },
+
+            // Wall Thickness: 5 mm – 50 mm
+            'inp-wt': {
+                getMin() {
+                    const u = document.getElementById('sel-wt-unit').value;
+                    return u === 'mm' ? 5 : 5 / 25.4; // ≈0.197 in
+                },
+                getMax() {
+                    const u = document.getElementById('sel-wt-unit').value;
+                    return u === 'mm' ? 50 : 50 / 25.4; // ≈1.97 in
+                },
+                safeMin() {
+                    const u = document.getElementById('sel-wt-unit').value;
+                    return u === 'mm' ? 5 : 5 / 25.4;
+                }
+            },
+
+            // Chainage: 0 – 2500 km (applies to launcher & receiver)
+            'inp-ch-start': {
+                getMin() { return 0; },
+                getMax() {
+                    const u = document.getElementById('sel-dist-unit').value;
+                    if (u === 'km')   return 2500;
+                    if (u === 'mile') return 2500 / 1.60934;
+                    if (u === 'm')    return 2500 * 1000;
+                    return 2500;
+                },
+                safeMin() { return 0; }
+            },
+            'inp-ch-end': {
+                getMin() { return 0; },
+                getMax() {
+                    const u = document.getElementById('sel-dist-unit').value;
+                    if (u === 'km')   return 2500;
+                    if (u === 'mile') return 2500 / 1.60934;
+                    if (u === 'm')    return 2500 * 1000;
+                    return 2500;
+                },
+                safeMin() { return 0; }
+            },
+
+            // Flow Rate: 0 – 2,000,000 SCMH
+            'inp-flow': {
+                getMin() { return 0; },
+                getMax() {
+                    const unit = document.getElementById('sel-flow-unit').value;
+                    if (currentMode === 'gas') {
+                        // base = SCMH-equivalent
+                        const maxBase = 2_000_000;
+                        return converters.flow.fromBase(maxBase, unit);
+                    } else {
+                        // liquid: numeric guardrail only
+                        return 2_000_000;
+                    }
+                },
+                safeMin() { return 0; }
+            },
+
+            // Pressure: 0 – 300 kg/cm²
+            'inp-pin': {
+                getMin() { return 0; },
+                getMax() {
+                    const unit = document.getElementById('sel-press-unit').value;
+                    const maxKg = 300;
+                    return converters.pressure.fromBase(maxKg, unit);
+                },
+                safeMin() { return 0; }
+            },
+            'inp-pout': {
+                getMin() { return 0; },
+                getMax() {
+                    const unit = document.getElementById('sel-press-unit').value;
+                    const maxKg = 300;
+                    return converters.pressure.fromBase(maxKg, unit);
+                },
+                safeMin() { return 0; }
+            },
+
+            // Temperature: 0 – 150 °C
+            'inp-temp': {
+                getMin() {
+                    const unit = document.getElementById('sel-temp-unit').value;
+                    return converters.temp.fromBase(0, unit); // 0°C
+                },
+                getMax() {
+                    const unit = document.getElementById('sel-temp-unit').value;
+                    return converters.temp.fromBase(150, unit); // 150°C
+                },
+                safeMin() {
+                    const unit = document.getElementById('sel-temp-unit').value;
+                    return converters.temp.fromBase(0, unit);
+                }
+            },
+
+            // Specific Gravity: 0.50 – 2.00
+            'inp-sg': {
+                getMin() { return 0.50; },
+                getMax() { return 2.00; },
+                safeMin() { return 0.50; }
+            },
+
+            // Viscosity: 0.1 – 5000 cP
+            'inp-visc': {
+                getMin() { return 0.1; },
+                getMax() { return 5000; },
+                safeMin() { return 0.1; }
+            },
+
+            // Sealing Efficiency: 10% – 100%
+            'inp-eff': {
+                getMin() { return 10; },
+                getMax() { return 100; },
+                safeMin() { return 10; }
+            }
+        };
+
+        function formatNumberForInput(value, el) {
+            const stepAttr = el.getAttribute('step');
+            let decimals = 2;
+            if (stepAttr && stepAttr.indexOf('.') >= 0) {
+                decimals = stepAttr.split('.')[1].length;
+            } else if (stepAttr && !stepAttr.includes('.')) {
+                decimals = 0;
+            }
+            return value.toFixed(decimals);
+        }
+
+        // Auto-clamp on blur + safe minimum for empty/NaN
+        function clampInputValue(el) {
+            const cfg = rangeConfig[el.id];
+            if (!cfg) return; // Only clamp configured fields
+
+            let raw = (el.value || '').trim();
+
+            // If cleared or non-numeric → safe minimum
+            if (raw === '' || isNaN(parseFloat(raw))) {
+                const safe = typeof cfg.safeMin === 'function' ? cfg.safeMin() : cfg.safeMin;
+                el.value = formatNumberForInput(safe, el);
+                return;
+            }
+
+            let val = parseFloat(raw);
+            let min = typeof cfg.getMin === 'function' ? cfg.getMin() : cfg.min;
+            let max = typeof cfg.getMax === 'function' ? cfg.getMax() : cfg.max;
+
+            if (typeof min === 'number' && val < min) val = min;
+            if (typeof max === 'number' && val > max) val = max;
+
+            el.value = formatNumberForInput(val, el);
+        }
+
+        // --- MODE SWITCH ---
+        window.setMode = function(mode) {
+            currentMode = mode;
+            document.getElementById('btn-mode-gas').className = mode === 'gas' ? 'toggle-btn active' : 'toggle-btn';
+            document.getElementById('btn-mode-liquid').className = mode === 'liquid' ? 'toggle-btn active' : 'toggle-btn';
             
-            document.addEventListener('click', function(e) {
-                const menu = document.getElementById('main-menu');
-                const btn = document.querySelector('.btn-menu');
-                if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                    menu.classList.remove('show');
+            const sel = document.getElementById('sel-flow-unit');
+            sel.innerHTML = '';
+            flowOptions[mode].forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.val;
+                o.innerText = opt.label;
+                sel.appendChild(o);
+            });
+            lastUnits['sel-flow-unit'] = flowOptions[mode][0].val;
+
+            if (mode === 'gas') {
+                document.getElementById('group-sg').classList.remove('hidden');
+                document.getElementById('group-visc').classList.add('hidden');
+                document.getElementById('row-z').classList.remove('hidden');
+                document.getElementById('row-pavg').classList.remove('hidden');
+                document.getElementById('label-details').innerText = "Calculation Details (AGA / CNGA)";
+            } else {
+                document.getElementById('group-sg').classList.add('hidden');
+                document.getElementById('group-visc').classList.remove('hidden');
+                document.getElementById('row-z').classList.add('hidden');
+                document.getElementById('row-pavg').classList.add('hidden');
+                document.getElementById('label-details').innerText = "Calculation Details (Incompressible)";
+            }
+            calculate();
+        };
+
+        // --- UNIT HANDLERS ---
+        function handleUnitChange(e) {
+            const select = e.target;
+            const type = select.dataset.type;
+            const inputIds = select.dataset.input.split(',');
+            const newUnit = select.value;
+            const oldUnit = lastUnits[select.id];
+
+            if (!oldUnit || !type || newUnit === oldUnit) return;
+            const converter = converters[type];
+
+            inputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.value !== "") {
+                    let val = parseFloat(el.value);
+                    if (!isNaN(val)) {
+                        const baseVal = converter.toBase(val, oldUnit);
+                        const newVal = converter.fromBase(baseVal, newUnit);
+                        el.value = (Math.abs(newVal) < 0.01 || Math.abs(newVal) > 10000) 
+                            ? newVal.toPrecision(6) / 1 
+                            : parseFloat(newVal.toFixed(4));
+                    }
+                }
+            });
+            lastUnits[select.id] = newUnit;
+            if(select.id === 'sel-dist-unit') syncDistUnits(newUnit);
+            if(select.id === 'sel-press-unit') syncPressUnits(newUnit);
+
+            // Clamp affected inputs after unit change
+            inputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && typeof clampInputValue === 'function') {
+                    clampInputValue(el);
                 }
             });
 
-            window.handleMenuAction = function(action) {
-                document.getElementById('main-menu').classList.remove('show'); 
-                if(action === 'scenario') openModal();
-                if(action === 'share') shareLink();
-                if(action === 'report') printReport();
-            }
+            calculate();
+        }
 
-            window.shareLink = function() {
+        function getMetricValues() {
+            const rawOd = getVal('inp-od');
+            const rawWt = getVal('inp-wt');
+            const rawStart = getVal('inp-ch-start');
+            const rawEnd = getVal('inp-ch-end');
+            const rawFlow = getVal('inp-flow'); 
+            const rawPin = getVal('inp-pin');
+            const rawPout = getVal('inp-pout');
+            const rawTemp = getVal('inp-temp');
+
+            const unitOd = document.getElementById('sel-od-unit').value;
+            const unitWt = document.getElementById('sel-wt-unit').value;
+            const unitDist = document.getElementById('sel-dist-unit').value;
+            const unitPress = document.getElementById('sel-press-unit').value;
+            const unitTemp = document.getElementById('sel-temp-unit').value;
+
+            return {
+                odMm: converters.length.toBase(rawOd, unitOd),
+                wtMm: converters.length.toBase(rawWt, unitWt),
+                startKm: converters.distance.toBase(rawStart, unitDist),
+                endKm: converters.distance.toBase(rawEnd, unitDist),
+                rawFlow,
+                pinKg: converters.pressure.toBase(rawPin, unitPress),
+                poutKg: converters.pressure.toBase(rawPout, unitPress),
+                tempC: converters.temp.toBase(rawTemp, unitTemp)
+            };
+        }
+
+        function syncDistUnits(val) { document.getElementById('lbl-dist-unit-end').innerText = val; }
+        function syncPressUnits(val) {
+            let label = "kg/cm²g";
+            if(val === 'bar') label = "bar g";
+            if(val === 'psi') label = "psig";
+            document.getElementById('lbl-press-unit-out').innerText = label;
+        }
+
+        // --- WAYPOINT LOGIC ---
+        window.addWaypoint = function(name = "", km = "", actual = "") {
+            const id = Date.now() + Math.random().toString(16).slice(2);
+            waypoints.push({ id, name, km, actualTime: actual });
+            renderWaypoints();
+            calculate();
+        }
+
+        window.removeWaypoint = function(id) {
+            waypoints = waypoints.filter(wp => wp.id !== id);
+            renderWaypoints();
+            calculate();
+        }
+
+        window.updateWaypoint = function(id, field, value) {
+            const wp = waypoints.find(w => w.id === id);
+            if(wp) {
+                wp[field] = value;
+                calculate();
+            }
+        }
+        
+        // Specialized Clear Function
+        window.clearWaypointTime = function(id) {
+            const wp = waypoints.find(w => w.id === id);
+            if(wp) {
+                wp.actualTime = ""; 
+                renderWaypoints();  
+                calculate();        
+            }
+        }
+
+        function renderWaypoints() {
+            const container = document.getElementById('wp-list');
+            container.innerHTML = "";
+            
+            waypoints.forEach(wp => {
+                const div = document.createElement('div');
+                div.className = "wp-item";
+                div.innerHTML = `
+                    <div class="wp-row-main">
+                        <input type="text" class="wp-input" style="flex:2" placeholder="Name (e.g. SV-01)" 
+                            value="${wp.name || ''}" oninput="updateWaypoint('${wp.id}', 'name', this.value)">
+                        <input type="number" class="wp-input" style="flex:1" placeholder="Loc" 
+                            value="${wp.km || ''}" oninput="updateWaypoint('${wp.id}', 'km', this.value)">
+                        <button class="wp-btn-del" onclick="removeWaypoint('${wp.id}')">&times;</button>
+                    </div>
+                    <div class="wp-row-actual">
+                        <span class="wp-label-small">Actual Arrival</span>
+                        <input type="datetime-local" class="wp-input" style="flex:1; font-size:0.75rem;" 
+                            value="${wp.actualTime || ''}" onchange="updateWaypoint('${wp.id}', 'actualTime', this.value)">
+                        <button class="wp-btn-clear" onclick="clearWaypointTime('${wp.id}')">Clear</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- MENU & TOAST LOGIC ---
+        window.toggleMenu = function() {
+            const menu = document.getElementById('main-menu');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        window.handleMenuAction = function(action) {
+            const menu = document.getElementById('main-menu');
+            menu.style.display = 'none';
+
+            if (action === 'scenario') {
+                openModal();
+            } else if (action === 'share') {
+                shareLink();
+            } else if (action === 'report') {
+                printReport();
+            }
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            if(!el) return;
+            el.innerText = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // Robust share-link generator (short keys + SV + fallback prompt)
+        window.shareLink = function () {
+            try {
                 const params = new URLSearchParams();
-                
+
+                // Core mode + inputs (short keys like v2)
                 params.set('mode', currentMode);
                 params.set('od', document.getElementById('inp-od').value);
                 params.set('wt', document.getElementById('inp-wt').value);
@@ -1464,576 +1700,687 @@
                 params.set('temp', document.getElementById('inp-temp').value);
                 params.set('eff', document.getElementById('inp-eff').value);
                 params.set('ptype', document.getElementById('sel-pig-type').value);
-                
-                if (document.getElementById('inp-sg')) params.set('sg', document.getElementById('inp-sg').value);
-                if (document.getElementById('inp-visc')) params.set('visc', document.getElementById('inp-visc').value);
-                if (document.getElementById('inp-launch')) params.set('launch', document.getElementById('inp-launch').value);
 
-                params.set('u_od', document.getElementById('sel-od-unit').value);
-                params.set('u_wt', document.getElementById('sel-wt-unit').value);
+                // Optional gas / liquid extras
+                if (document.getElementById('inp-sg')) {
+                    params.set('sg', document.getElementById('inp-sg').value);
+                }
+                if (document.getElementById('inp-visc')) {
+                    params.set('visc', document.getElementById('inp-visc').value);
+                }
+                if (document.getElementById('inp-launch')) {
+                    params.set('launch', document.getElementById('inp-launch').value);
+                }
+
+                // Units
+                params.set('u_od',   document.getElementById('sel-od-unit').value);
+                params.set('u_wt',   document.getElementById('sel-wt-unit').value);
                 params.set('u_dist', document.getElementById('sel-dist-unit').value);
                 params.set('u_flow', document.getElementById('sel-flow-unit').value);
-                params.set('u_p', document.getElementById('sel-press-unit').value);
-                params.set('u_t', document.getElementById('sel-temp-unit').value);
+                params.set('u_p',    document.getElementById('sel-press-unit').value);
+                params.set('u_t',    document.getElementById('sel-temp-unit').value);
 
+                // SV stations → compact JSON array
                 if (waypoints.length > 0) {
-                    const minWps = waypoints.map(w => [w.name, w.km, w.actualTime]);
+                    const minWps = waypoints.map(w => [
+                        w.name || '',
+                        w.km || '',
+                        w.actualTime || ''
+                    ]);
                     params.set('sv', JSON.stringify(minWps));
                 }
 
                 const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-                
+
                 navigator.clipboard.writeText(url).then(() => {
-                    const toast = document.getElementById("toast");
-                    toast.className = "show";
-                    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+                    showToast("Shareable link copied to clipboard!");
                 }).catch(err => {
-                    prompt("Copy this link:", url);
+                    console.error(err);
+                    // Fallback so the link is still visible to the user
+                    window.prompt("Copy this link:", url);
                 });
+            } catch (e) {
+                console.error(e);
+                showToast("Error generating share link.");
+            }
+        };
+
+        function printReport() {
+            // 1) Capture current date/time
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            const dateTimeStr = now.toLocaleString();
+
+            // 2) Take status directly from Live Position section
+            const liveStatusEl = document.getElementById('pig-status-text');
+            let statusText = 'Ready';
+            if (liveStatusEl && liveStatusEl.textContent.trim() !== '') {
+                statusText = liveStatusEl.textContent.trim();
             }
 
-            // --- REPORT PRINTING ---
-            window.printReport = function() {
-                document.getElementById('rpt-date').innerText = "Date: " + new Date().toLocaleDateString();
-                document.getElementById('rpt-status').innerText = rptData.status;
-                document.getElementById('rpt-gen-time').innerText = new Date().toLocaleString();
-
-                document.getElementById('rpt-vel').innerText = document.getElementById('out-vel-ms').innerText + " m/s";
-                document.getElementById('rpt-time').innerText = document.getElementById('out-time-hhmm').innerText + " hrs";
-                document.getElementById('rpt-eta').innerText = document.getElementById('out-eta-time').innerText;
-
-                document.getElementById('rpt-od').innerText = document.getElementById('inp-od').value;
-                document.getElementById('rpt-od-u').innerText = document.getElementById('sel-od-unit').value;
-                document.getElementById('rpt-wt').innerText = document.getElementById('inp-wt').value;
-                document.getElementById('rpt-wt-u').innerText = document.getElementById('sel-wt-unit').value;
-                document.getElementById('rpt-id').innerText = document.getElementById('val-id').innerText;
-                document.getElementById('rpt-len').innerText = document.getElementById('val-length').innerText + " km";
-                document.getElementById('rpt-vol').innerText = document.getElementById('out-vol').innerText;
-
-                document.getElementById('rpt-mode').innerText = currentMode;
-                document.getElementById('rpt-flow').innerText = document.getElementById('inp-flow').value;
-                document.getElementById('rpt-flow-u').innerText = document.getElementById('sel-flow-unit').options[document.getElementById('sel-flow-unit').selectedIndex].text;
-                document.getElementById('rpt-pin').innerText = document.getElementById('inp-pin').value;
-                document.getElementById('rpt-pout').innerText = document.getElementById('inp-pout').value;
-                document.getElementById('rpt-p-u').innerText = document.getElementById('lbl-press-unit-out').innerText;
-                document.getElementById('rpt-temp').innerText = document.getElementById('inp-temp').value;
-                document.getElementById('rpt-temp-u').innerText = document.getElementById('sel-temp-unit').options[document.getElementById('sel-temp-unit').selectedIndex].text;
-                
-                const launchRaw = document.getElementById('inp-launch').value;
-                document.getElementById('rpt-launch').innerText = launchRaw ? new Date(launchRaw).toLocaleString() : "--";
-
-                const tbody = document.getElementById('rpt-sv-body');
-                tbody.innerHTML = '';
-                
-                const uiRows = document.querySelectorAll('#wp-result-body tr');
-                if(uiRows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">No SV Stations defined.</td></tr>';
-                } else {
-                    uiRows.forEach(row => {
-                        const newRow = row.cloneNode(true);
-                        newRow.cells[0].style.color = "black";
-                        newRow.cells[1].style.color = "black";
-                        newRow.cells[2].style.color = "black";
-                        const span = newRow.cells[2].querySelector('span');
-                        if(span && span.style.color === 'rgb(251, 191, 36)') span.style.color = "#d97706"; 
-                        tbody.appendChild(newRow);
-                    });
-                }
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="font-weight:bold">Receiver</td>
-                    <td>${document.getElementById('inp-ch-end').value} ${document.getElementById('sel-dist-unit').value}</td>
-                    <td>${document.getElementById('out-eta-time').innerText}<br><span style="font-size:0.7em; color:#666">${document.getElementById('out-eta-date').innerText}</span></td>
-                    <td><span class="status-badge status-coming" style="border:1px solid #ccc; color:#444">Target</span></td>
-                `;
-                tbody.appendChild(tr);
-
-                window.print();
+            // Keep rptData in sync with what user actually sees
+            if (typeof rptData !== 'undefined' && rptData) {
+                rptData.status = statusText;
             }
 
-            // --- SCENARIO LOGIC ---
-            window.openModal = function() {
-                document.getElementById('modal-scenarios').style.display = 'flex';
-                renderScenarioList();
-            }
-            window.closeModal = function() {
-                document.getElementById('modal-scenarios').style.display = 'none';
+            // Update report header meta
+            const rptDateEl = document.getElementById("rpt-date");
+            if (rptDateEl) {
+                rptDateEl.textContent = "Date: " + dateStr;
             }
 
-            window.saveCurrentScenario = function() {
-                const name = document.getElementById('scenario-name').value.trim();
-                if(!name) return alert("Please enter a scenario name");
-
-                const inputs = { mode: currentMode, waypoints: waypoints };
-                document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
-                document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
-
-                const newScenario = {
-                    id: Date.now(),
-                    name: name,
-                    date: new Date().toLocaleString(),
-                    data: inputs
-                };
-
-                savedScenarios.push(newScenario);
-                safeStorage.save('pigCalc_scenarios', savedScenarios);
-                
-                document.getElementById('scenario-name').value = '';
-                renderScenarioList();
+            const rptStatusEl = document.getElementById("rpt-status");
+            if (rptStatusEl) {
+                rptStatusEl.textContent = statusText;
             }
 
-            window.loadScenario = function(id) {
-                const sc = savedScenarios.find(s => s.id == id);
-                if(!sc) return;
-                applyData(sc.data);
-                closeModal();
+            const rptGenTimeEl = document.getElementById("rpt-gen-time");
+            if (rptGenTimeEl) {
+                rptGenTimeEl.textContent = dateTimeStr;
             }
 
-            window.deleteScenario = function(id) {
-                if(confirm("Delete this scenario?")) {
-                    savedScenarios = savedScenarios.filter(s => s.id != id);
-                    safeStorage.save('pigCalc_scenarios', savedScenarios);
-                    renderScenarioList();
-                }
-            }
+            // 3) Fill core numeric results from current UI
+            document.getElementById('rpt-vel').innerText =
+                `${document.getElementById('out-vel-ms').innerText} m/s`;
+            document.getElementById('rpt-time').innerText =
+                document.getElementById('out-time-hhmm').innerText;
+            document.getElementById('rpt-eta').innerText =
+                `${document.getElementById('out-eta-time').innerText} (${document.getElementById('out-eta-date').innerText})`;
 
-            function renderScenarioList() {
-                const list = document.getElementById('list-scenarios');
-                list.innerHTML = '';
-                
-                if(savedScenarios.length === 0) {
-                    list.innerHTML = '<div style="padding:15px; color:#64748b; text-align:center;">No saved scenarios.</div>';
-                    return;
-                }
+            // 4) Geometry
+            document.getElementById('rpt-od').innerText = document.getElementById('inp-od').value;
+            document.getElementById('rpt-od-u').innerText = document.getElementById('sel-od-unit').value;
+            document.getElementById('rpt-wt').innerText = document.getElementById('inp-wt').value;
+            document.getElementById('rpt-wt-u').innerText = document.getElementById('sel-wt-unit').value;
+            document.getElementById('rpt-id').innerText = document.getElementById('val-id').innerText;
+            document.getElementById('rpt-len').innerText =
+                document.getElementById('val-length').innerText + ' ' +
+                document.getElementById('sel-dist-unit').value;
+            document.getElementById('rpt-vol').innerText =
+                document.getElementById('out-vol').innerText + ' m³';
 
-                savedScenarios.slice().reverse().forEach(sc => {
-                    const div = document.createElement('div');
-                    div.className = 'scenario-item';
-                    div.innerHTML = `
-                        <div class="scenario-info">
-                            <span class="scenario-name">${sc.name}</span>
-                            <span class="scenario-date">${sc.date}</span>
-                        </div>
-                        <div class="scenario-actions">
-                            <button class="btn-action" onclick="loadScenario(${sc.id})">Load</button>
-                            <button class="btn-action" style="border-color:#7f1d1d; color:#f87171" onclick="deleteScenario(${sc.id})">X</button>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
-            }
+            // 5) Operating data
+            document.getElementById('rpt-mode').innerText = currentMode;
+            document.getElementById('rpt-flow').innerText = document.getElementById('inp-flow').value;
+            document.getElementById('rpt-flow-u').innerText =
+                document.getElementById('sel-flow-unit')
+                        .options[document.getElementById('sel-flow-unit').selectedIndex].text;
+            document.getElementById('rpt-pin').innerText = document.getElementById('inp-pin').value;
+            document.getElementById('rpt-pout').innerText = document.getElementById('inp-pout').value;
+            document.getElementById('rpt-p-u').innerText =
+                document.getElementById('lbl-press-unit-out').innerText;
+            document.getElementById('rpt-temp').innerText = document.getElementById('inp-temp').value;
+            document.getElementById('rpt-temp-u').innerText =
+                document.getElementById('sel-temp-unit')
+                        .options[document.getElementById('sel-temp-unit').selectedIndex].text;
 
-            // --- HELPER: APPLY DATA OBJECT TO UI ---
-            function applyData(data) {
-                if(data.mode) setMode(data.mode);
-                
-                if(Array.isArray(data.waypoints)) {
-                    waypoints = data.waypoints;
-                } else if (data.sv) { // From URL
-                    try {
-                        const raw = JSON.parse(data.sv);
-                        waypoints = raw.map(item => ({
-                            id: Date.now() + Math.random().toString(16).slice(2),
-                            name: item[0],
-                            km: item[1],
-                            actualTime: item[2]
-                        }));
-                    } catch(e) { console.error("SV Parse Error", e); }
-                }
-                renderWaypoints();
+            const launchRaw = document.getElementById('inp-launch').value;
+            document.getElementById('rpt-launch').innerText =
+                launchRaw ? new Date(launchRaw).toLocaleString() : "--";
 
-                const mappings = {
-                    'inp-od': data.od || data['inp-od'],
-                    'inp-wt': data.wt || data['inp-wt'],
-                    'inp-ch-start': data.start || data['inp-ch-start'],
-                    'inp-ch-end': data.end || data['inp-ch-end'],
-                    'inp-flow': data.flow || data['inp-flow'],
-                    'inp-pin': data.pin || data['inp-pin'],
-                    'inp-pout': data.pout || data['inp-pout'],
-                    'inp-temp': data.temp || data['inp-temp'],
-                    'inp-eff': data.eff || data['inp-eff'],
-                    'sel-pig-type': data.ptype || data['sel-pig-type'], // NEW
-                    'inp-sg': data.sg || data['inp-sg'],
-                    'inp-visc': data.visc || data['inp-visc'],
-                    'inp-launch': data.launch || data['inp-launch'],
-                    
-                    'sel-od-unit': data.u_od || data['sel-od-unit'],
-                    'sel-wt-unit': data.u_wt || data['sel-wt-unit'],
-                    'sel-dist-unit': data.u_dist || data['sel-dist-unit'],
-                    'sel-flow-unit': data.u_flow || data['sel-flow-unit'],
-                    'sel-press-unit': data.u_p || data['sel-press-unit'],
-                    'sel-temp-unit': data.u_t || data['sel-temp-unit']
-                };
+            // 6) SV table
+            const tbody = document.getElementById('rpt-sv-body');
+            tbody.innerHTML = '';
 
-                Object.keys(mappings).forEach(id => {
-                    const el = document.getElementById(id);
-                    if(el && mappings[id] !== undefined) {
-                        el.value = mappings[id];
-                        if(id.startsWith('sel-')) {
-                            if(lastUnits.hasOwnProperty(id)) lastUnits[id] = mappings[id];
-                            if(id === 'sel-dist-unit') syncDistUnits(mappings[id]);
-                            if(id === 'sel-press-unit') syncPressUnits(mappings[id]);
-                        }
+            const uiRows = document.querySelectorAll('#wp-result-body tr');
+            if (uiRows.length === 0) {
+                tbody.innerHTML =
+                    '<tr><td colspan="4">No SV Stations defined.</td></tr>';
+            } else {
+                uiRows.forEach(row => {
+                    const newRow = row.cloneNode(true);
+                    // Normalise colours for print (black text)
+                    newRow.cells[0].style.color = "black";
+                    newRow.cells[1].style.color = "black";
+                    newRow.cells[2].style.color = "black";
+                    const span = newRow.cells[2].querySelector('span');
+                    if (span && span.style.color === 'rgb(251, 191, 36)') {
+                        span.style.color = "#d97706";
                     }
+                    tbody.appendChild(newRow);
                 });
+            }
+
+            // Append receiver row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:bold">Receiver</td>
+                <td>${document.getElementById('inp-ch-end').value} ${document.getElementById('sel-dist-unit').value}</td>
+                <td>${document.getElementById('out-eta-time').innerText}<br>
+                    <span style="font-size:0.7em; color:#666">${document.getElementById('out-eta-date').innerText}</span>
+                </td>
+                <td><span class="status-badge status-coming" style="border:1px solid #ccc; color:#444">Target</span></td>
+            `;
+            tbody.appendChild(tr);
+
+            // 7) Trigger browser print with all fields updated
+            window.print();
+        }
+
+        // --- SCENARIO LOGIC ---
+        window.openModal = function() {
+            document.getElementById('modal-scenarios').style.display = 'flex';
+            renderScenarioList();
+        }
+        window.closeModal = function() {
+            document.getElementById('modal-scenarios').style.display = 'none';
+        }
+
+        window.saveCurrentScenario = function() {
+            const name = document.getElementById('scenario-name').value.trim();
+            if(!name) return alert("Please enter a scenario name");
+
+            const inputs = { mode: currentMode, waypoints: waypoints };
+            document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
+            document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+
+            const newScenario = {
+                id: Date.now(),
+                name: name,
+                date: new Date().toLocaleString(),
+                data: inputs
+            };
+
+            savedScenarios.push(newScenario);
+            safeStorage.save('pigCalc_scenarios', savedScenarios);
+            
+            document.getElementById('scenario-name').value = '';
+            renderScenarioList();
+        }
+
+        window.loadScenario = function(id) {
+            const sc = savedScenarios.find(s => s.id == id);
+            if(!sc) return;
+            applyData(sc.data);
+            closeModal();
+        }
+
+        window.deleteScenario = function(id) {
+            if(confirm("Delete this scenario?")) {
+                savedScenarios = savedScenarios.filter(s => s.id != id);
+                safeStorage.save('pigCalc_scenarios', savedScenarios);
+                renderScenarioList();
+            }
+        }
+
+        function renderScenarioList() {
+            const list = document.getElementById('list-scenarios');
+            list.innerHTML = '';
+            
+            if(savedScenarios.length === 0) {
+                list.innerHTML = '<div style="padding:15px; color:#64748b; text-align:center;">No saved scenarios.</div>';
+                return;
+            }
+
+            savedScenarios.slice().reverse().forEach(sc => {
+                const div = document.createElement('div');
+                div.className = 'scenario-item';
+                div.innerHTML = `
+                    <div class="scenario-info">
+                        <span class="scenario-name">${sc.name}</span>
+                        <span class="scenario-date">${sc.date}</span>
+                    </div>
+                    <div class="scenario-actions">
+                        <button class="btn-action" onclick="loadScenario(${sc.id})">Load</button>
+                        <button class="btn-action" style="border-color:#7f1d1d; color:#f87171" onclick="deleteScenario(${sc.id})">X</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- HELPER: APPLY DATA OBJECT TO UI ---
+        function applyData(data) {
+            if(data.mode) setMode(data.mode);
+            
+            if(Array.isArray(data.waypoints)) {
+                waypoints = data.waypoints;
+            } else if (data.sv) { // From URL
+                try {
+                    const raw = JSON.parse(data.sv);
+                    waypoints = raw.map(item => ({
+                        id: Date.now() + Math.random().toString(16).slice(2),
+                        name: item[0],
+                        km: item[1],
+                        actualTime: item[2]
+                    }));
+                } catch(e) { console.error("SV Parse Error", e); }
+            }
+            renderWaypoints();
+
+            const mappings = {
+                'inp-od': data.od || data['inp-od'],
+                'inp-wt': data.wt || data['inp-wt'],
+                'inp-ch-start': data.start || data['inp-ch-start'],
+                'inp-ch-end': data.end || data['inp-ch-end'],
+                'inp-flow': data.flow || data['inp-flow'],
+                'inp-pin': data.pin || data['inp-pin'],
+                'inp-pout': data.pout || data['inp-pout'],
+                'inp-temp': data.temp || data['inp-temp'],
+                'inp-eff': data.eff || data['inp-eff'],
+                'sel-pig-type': data.ptype || data['sel-pig-type'],
+                'inp-sg': data.sg || data['inp-sg'],
+                'inp-visc': data.visc || data['inp-visc'],
+                'inp-launch': data.launch || data['inp-launch'],
                 
+                'sel-od-unit': data.u_od || data['sel-od-unit'],
+                'sel-wt-unit': data.u_wt || data['sel-wt-unit'],
+                'sel-dist-unit': data.u_dist || data['sel-dist-unit'],
+                'sel-flow-unit': data.u_flow || data['sel-flow-unit'],
+                'sel-press-unit': data.u_p || data['sel-press-unit'],
+                'sel-temp-unit': data.u_t || data['sel-temp-unit']
+            };
+
+            Object.keys(mappings).forEach(id => {
+                const el = document.getElementById(id);
+                if(el && mappings[id] !== undefined) {
+                    el.value = mappings[id];
+                    if(id.startsWith('sel-')) {
+                        if(lastUnits.hasOwnProperty(id)) lastUnits[id] = mappings[id];
+                        if(id === 'sel-dist-unit') syncDistUnits(mappings[id]);
+                        if(id === 'sel-press-unit') syncPressUnits(mappings[id]);
+                    }
+                }
+            });
+            
+            calculate();
+        }
+
+        // --- INIT ---
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('mode')) {
+                const data = {};
+                for(const [key, value] of params.entries()) {
+                    data[key] = value;
+                }
+                setMode(data.mode || 'gas');
+                setTimeout(() => applyData(data), 50);
+                // Ensure Animation Starts for Shared Links
+                requestAnimationFrame(animate); 
+                return; 
+            }
+
+            const storedScenarios = safeStorage.load('pigCalc_scenarios');
+            if(storedScenarios) savedScenarios = storedScenarios;
+
+            const saved = safeStorage.load('pigCalc_v6');
+            if (saved) {
+                applyData(saved);
+            } else {
+                setMode('gas');
+                const now = new Date();
+                const oneHourAgo = new Date(now.getTime() - (3600000));
+                oneHourAgo.setMinutes(oneHourAgo.getMinutes() - oneHourAgo.getTimezoneOffset());
+                const el = document.getElementById('inp-launch');
+                if(el) el.value = oneHourAgo.toISOString().slice(0, 16);
                 calculate();
             }
+            requestAnimationFrame(animate);
+        }
 
-            // --- INIT ---
-            function init() {
-                const params = new URLSearchParams(window.location.search);
-                if (params.has('mode')) {
-                    const data = {};
-                    for(const [key, value] of params.entries()) {
-                        data[key] = value;
-                    }
-                    setMode(data.mode || 'gas');
-                    setTimeout(() => applyData(data), 50);
-                    // FIXED: Ensure Animation Starts for Shared Links
-                    requestAnimationFrame(animate); 
+        // --- CALCULATION ---
+        function calculate() {
+            // 1. CLEAR OLD ERRORS
+            clearValidation();
+
+            const inputs = { mode: currentMode, waypoints: waypoints };
+            document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
+            document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+            safeStorage.save('pigCalc_v6', inputs);
+
+            document.querySelectorAll('.wp-tick').forEach(el => el.remove());
+
+            try {
+                const vals = getMetricValues();
+
+                // 2. RUN VALIDATION
+                if (!runValidation(vals)) {
+                    document.getElementById('out-vel-ms').innerText = "ERR";
+                    document.getElementById('out-eta-time').innerText = "--:--";
                     return; 
                 }
 
-                const storedScenarios = safeStorage.load('pigCalc_scenarios');
-                if(storedScenarios) savedScenarios = storedScenarios;
+                const { odMm, wtMm, startKm, endKm, rawFlow, pinKg, poutKg, tempC } = vals;
+                const eff = getVal('inp-eff') / 100;
+                const distUnit = document.getElementById('sel-dist-unit').value;
 
-                const saved = safeStorage.load('pigCalc_v6');
-                if (saved) {
-                    applyData(saved);
-                } else {
-                    setMode('gas');
-                    const now = new Date();
-                    const oneHourAgo = new Date(now.getTime() - (3600000));
-                    oneHourAgo.setMinutes(oneHourAgo.getMinutes() - oneHourAgo.getTimezoneOffset());
-                    const el = document.getElementById('inp-launch');
-                    if(el) el.value = oneHourAgo.toISOString().slice(0, 16);
-                    calculate();
-                }
-                requestAnimationFrame(animate);
-            }
+                // Geometry
+                launcherKm = isNaN(startKm) ? 0 : startKm;
+                receiverKm = isNaN(endKm) ? 0 : endKm;
+                pipelineLengthKm = Math.abs(receiverKm - launcherKm);
 
-            // --- CALCULATION ---
-            function calculate() {
-                // 1. CLEAR OLD ERRORS
-                clearValidation();
+                // Labels
+                const uStart = getVal('inp-ch-start');
+                const uEnd = getVal('inp-ch-end');
+                document.getElementById('val-length').innerText = pipelineLengthKm.toFixed(3);
+                document.getElementById('label-launcher').innerText = `LAUNCHER (${uStart} ${distUnit})`;
+                document.getElementById('label-receiver').innerText = `RECEIVER (${uEnd} ${distUnit})`;
 
-                const inputs = { mode: currentMode, waypoints: waypoints };
-                document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
-                document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
-                safeStorage.save('pigCalc_v6', inputs);
-
-                document.querySelectorAll('.wp-tick').forEach(el => el.remove());
-
-                try {
-                    const vals = getMetricValues();
-
-                    // 2. RUN VALIDATION
-                    if (!runValidation(vals)) {
-                        document.getElementById('out-vel-ms').innerText = "ERR";
-                        document.getElementById('out-eta-time').innerText = "--:--";
-                        return; 
+                // Area
+                let areaSqM = 0;
+                if(!isNaN(odMm) && !isNaN(wtMm)) {
+                    const idMm2 = odMm - (2 * wtMm);
+                    document.getElementById('val-id').innerHTML = `<strong>${idMm2.toFixed(1)}</strong> mm`;
+                    areaSqM = Math.PI * Math.pow((idMm2 / 1000) / 2, 2);
+                    if(pipelineLengthKm > 0) {
+                        const vol = areaSqM * (pipelineLengthKm * 1000);
+                        document.getElementById('out-vol').innerText = Math.round(vol).toLocaleString();
                     }
-
-                    const { odMm, wtMm, startKm, endKm, rawFlow, pinKg, poutKg, tempC } = vals;
-                    const eff = getVal('inp-eff') / 100;
-                    const distUnit = document.getElementById('sel-dist-unit').value;
-
-                    // Geometry
-                    launcherKm = isNaN(startKm) ? 0 : startKm;
-                    receiverKm = isNaN(endKm) ? 0 : endKm;
-                    pipelineLengthKm = Math.abs(receiverKm - launcherKm);
-
-                    // Labels
-                    const uStart = getVal('inp-ch-start');
-                    const uEnd = getVal('inp-ch-end');
-                    document.getElementById('val-length').innerText = pipelineLengthKm.toFixed(3);
-                    document.getElementById('label-launcher').innerText = `LAUNCHER (${uStart} ${distUnit})`;
-                    document.getElementById('label-receiver').innerText = `RECEIVER (${uEnd} ${distUnit})`;
-
-                    // Area
-                    let areaSqM = 0;
-                    if(!isNaN(odMm) && !isNaN(wtMm)) {
-                        const idMm = odMm - (2 * wtMm);
-                        document.getElementById('val-id').innerHTML = `<strong>${idMm.toFixed(1)}</strong> mm`;
-                        areaSqM = Math.PI * Math.pow((idMm / 1000) / 2, 2);
-                        if(pipelineLengthKm > 0) {
-                            const vol = areaSqM * (pipelineLengthKm * 1000);
-                            document.getElementById('out-vol').innerText = Math.round(vol).toLocaleString();
-                        }
-                    }
-
-                    // --- 1. THEORETICAL VELOCITY (From Flow) ---
-                    let pigVelMs = 0;
-                    let qActM3Day = 0;
-                    let pAvgKg = 0;
-                    let zFactor = 0;
-                    
-                    let usingActuals = false;
-                    let lastConfirmedKm = launcherKm;
-                    let lastConfirmedTime = null;
-
-                    if(!isNaN(rawFlow) && areaSqM > 0 && pipelineLengthKm > 0) {
-                        if (currentMode === 'gas') {
-                            const sg = getVal('inp-sg');
-                            if(!isNaN(pinKg) && !isNaN(poutKg) && !isNaN(tempC) && !isNaN(sg)) {
-                                let flowScmh = rawFlow;
-                                const unitFlow = document.getElementById('sel-flow-unit').value;
-                                if(unitFlow === 'mmscfd') flowScmh = rawFlow * 1179.87;
-
-                                const qStd = flowScmh * SCMH_TO_SCFD;
-                                const pInPsia = (pinKg * KGCM2_TO_PSI) + 14.7;
-                                const pOutPsia = (poutKg * KGCM2_TO_PSI) + 14.7;
-                                const tempR = (tempC * 9/5) + 32 + 460;
-                                const pAvgPsia = (2/3) * (pInPsia + pOutPsia - ((pInPsia * pOutPsia) / (pInPsia + pOutPsia)));
-                                pAvgKg = pAvgPsia / KGCM2_TO_PSI;
-                                const num = (pAvgPsia - 14.7) * 344400 * Math.pow(10, 1.785 * sg);
-                                zFactor = 1 / (1 + (num / Math.pow(tempR, 3.825)));
-                                const qActCfDay = qStd * (STANDARD_PRESSURE_PSIA / pAvgPsia) * (tempR / STANDARD_TEMP_R) * zFactor;
-                                qActM3Day = qActCfDay * CFT_TO_M3;
-                            }
-                        } else {
-                            const unitFlow = document.getElementById('sel-flow-unit').value;
-                            if (unitFlow === 'm3hr') qActM3Day = rawFlow * 24;
-                            else if (unitFlow === 'bblday') qActM3Day = rawFlow * 0.1589873;
-                        }
-
-                        if (qActM3Day > 0) {
-                            pigVelMs = (qActM3Day / 86400 / areaSqM) * eff;
-                        }
-                    }
-
-                    // --- 2. ACTUAL VELOCITY RECALIBRATION ---
-                    const launchVal = document.getElementById('inp-launch').value;
-                    let sortedWps = [];
-
-                    if (launchVal) {
-                        const launchTimeMs = new Date(launchVal).getTime();
-                        lastConfirmedTime = launchTimeMs;
-
-                        sortedWps = waypoints.map(wp => {
-                            let kmVal = parseFloat(wp.km);
-                            kmVal = converters.distance.toBase(kmVal, distUnit);
-                            return { ...wp, kmVal: kmVal };
-                        }).filter(wp => !isNaN(wp.kmVal));
-
-                        sortedWps.sort((a, b) => Math.abs(a.kmVal - launcherKm) - Math.abs(b.kmVal - launcherKm));
-
-                        let bestWp = null;
-                        for (let i = 0; i < sortedWps.length; i++) {
-                            if (sortedWps[i].actualTime) {
-                                bestWp = sortedWps[i];
-                            }
-                        }
-
-                        if (bestWp) {
-                            const actualTimeMs = new Date(bestWp.actualTime).getTime();
-                            const distTraveledKm = Math.abs(bestWp.kmVal - launcherKm);
-                            const timeElapsedMs = actualTimeMs - launchTimeMs;
-
-                            if (distTraveledKm > 0 && timeElapsedMs > 0) {
-                                const realVelMs = (distTraveledKm * 1000) / (timeElapsedMs / 1000);
-                                pigVelMs = realVelMs; 
-                                usingActuals = true;
-                                lastConfirmedKm = bestWp.kmVal;
-                                lastConfirmedTime = actualTimeMs;
-                            }
-                        }
-                    }
-
-                    // --- 3. UI UPDATE ---
-                    const pigVelKmh = pigVelMs * 3.6;
-                    document.getElementById('out-vel-ms').innerText = pigVelMs.toFixed(2);
-                    document.getElementById('out-vel-kmh').innerText = pigVelKmh.toFixed(2);
-                    
-                    const velCard = document.getElementById('card-velocity');
-                    const velLabel = document.getElementById('label-velocity');
-                    if (usingActuals) {
-                        velCard.classList.remove('dash-blue');
-                        velCard.classList.add('dash-amber');
-                        velLabel.innerText = "Velocity (Actual)";
-                    } else {
-                        velCard.classList.remove('dash-amber');
-                        velCard.classList.add('dash-blue');
-                        velLabel.innerText = "Velocity (Calc)";
-                    }
-
-                    if(currentMode === 'gas') {
-                        document.getElementById('out-pavg').innerText = pAvgKg.toFixed(2);
-                        document.getElementById('out-z').innerText = zFactor > 0 ? zFactor.toFixed(4) : "0.000";
-                    }
-                    document.getElementById('out-qact').innerText = Math.round(qActM3Day).toLocaleString();
-
-                    const totalDistKm = Math.abs(receiverKm - launcherKm);
-                    const remDistKm = Math.abs(receiverKm - lastConfirmedKm); 
-                    
-                    if (pigVelMs > 0 && launchVal) {
-                        const remSeconds = (remDistKm * 1000) / pigVelMs;
-                        const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (remSeconds * 1000);
-                        const arrivalDate = new Date(etaMs);
-                        
-                        totalTravelHours = (etaMs - new Date(launchVal).getTime()) / 3600000;
-
-                        document.getElementById('out-eta-time').innerText = arrivalDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                        document.getElementById('out-eta-date').innerText = arrivalDate.toLocaleDateString();
-                        
-                        let h = Math.floor(totalTravelHours);
-                        let m = Math.round((totalTravelHours - h) * 60);
-                        if(m === 60) { m = 0; h++; }
-                        document.getElementById('out-time-hhmm').innerText = `${h}:${m.toString().padStart(2,'0')}`;
-                        document.getElementById('out-time-dec').innerText = totalTravelHours.toFixed(2);
-
-                        const now = new Date();
-                        if (now > arrivalDate) rptData.status = "Completed";
-                        else if (now > new Date(launchVal)) rptData.status = "In Progress";
-                        else rptData.status = "Scheduled";
-
-                    } else {
-                        document.getElementById('out-time-hhmm').innerText = "--:--";
-                        document.getElementById('out-eta-time').innerText = "--:--";
-                        totalTravelHours = 0;
-                        rptData.status = "Planning";
-                    }
-
-                    // --- 4. WAYPOINT / SV LIST UPDATE ---
-                    const wpTableBody = document.getElementById('wp-result-body');
-                    const wpCard = document.getElementById('card-wp-results');
-                    wpTableBody.innerHTML = "";
-
-                    if (sortedWps.length > 0 && pigVelMs > 0 && launchVal) {
-                        wpCard.style.display = 'block';
-                        const now = new Date();
-
-                        sortedWps.forEach(wp => {
-                            const tr = document.createElement('tr');
-                            let statusHtml = '';
-                            let timeDisplay = '';
-
-                            if (wp.actualTime) {
-                                const actDate = new Date(wp.actualTime);
-                                timeDisplay = `<span style="color:#fbbf24">${actDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span><br><span style="font-size:0.7em; color:#64748b">${actDate.toLocaleDateString()}</span>`;
-                                statusHtml = `<span class="status-badge status-confirmed">Confirmed</span>`;
-                            } else {
-                                const distFromLauncher = Math.abs(wp.kmVal - launcherKm);
-                                const distLastConf = Math.abs(lastConfirmedKm - launcherKm);
-                                
-                                if (distFromLauncher < distLastConf) {
-                                    timeDisplay = '--:--';
-                                    statusHtml = `<span class="status-badge" style="color:#64748b; border:1px solid #475569">Passed?</span>`;
-                                } else {
-                                    const distFromLast = Math.abs(wp.kmVal - lastConfirmedKm);
-                                    const secondsFromLast = (distFromLast * 1000) / pigVelMs;
-                                    const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (secondsFromLast * 1000);
-                                    const etaDate = new Date(etaMs);
-                                    
-                                    timeDisplay = `${etaDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}<br><span style="font-size:0.7em; color:#64748b">${etaDate.toLocaleDateString()}</span>`;
-                                    
-                                    const isPassed = now > etaDate;
-                                    statusHtml = `<span class="status-badge ${isPassed ? 'status-passed' : 'status-coming'}">${isPassed ? 'Crossed' : 'ETA'}</span>`;
-                                }
-                            }
-
-                            tr.innerHTML = `
-                                <td style="font-weight:bold; color:white;">${wp.name || 'SV'}</td>
-                                <td class="mono">${wp.km} ${distUnit}</td>
-                                <td class="mono">${timeDisplay}</td>
-                                <td>${statusHtml}</td>
-                            `;
-                            wpTableBody.appendChild(tr);
-
-                            let posPct = (Math.abs(wp.kmVal - launcherKm) / pipelineLengthKm) * 100;
-                            if (posPct >= 0 && posPct <= 100) {
-                                const tick = document.createElement('div');
-                                tick.className = 'wp-tick';
-                                tick.style.left = `${posPct}%`;
-                                tick.setAttribute('data-name', wp.name || wp.km);
-                                if(wp.actualTime) tick.style.background = '#fbbf24'; 
-                                document.getElementById('pipeline-vis').appendChild(tick);
-                            }
-                        });
-
-                    } else {
-                        if (sortedWps.length === 0) wpCard.style.display = 'none';
-                    }
-
-                    // 5. SAFETY CHECK
-                    if (pigVelMs > 5) { // > 5 m/s
-                        addMessage('warn', `High Velocity Warning: ${pigVelMs.toFixed(2)} m/s exceeds standard safety limits.`, null);
-                        document.getElementById('card-velocity').classList.add('dash-amber'); 
-                    }
-
-                    const safeVel = pigVelMs > 0 ? pigVelMs : 0.5;
-                    const dur = Math.max(0.2, 2 - (safeVel * 0.2));
-                    document.getElementById('flow-anim').style.animationDuration = `${dur}s`;
-
-                } catch(e) { console.error(e); }
-            }
-
-            // --- ANIMATION ---
-            function animate() {
-                const launchVal = document.getElementById('inp-launch').value;
-                const container = document.getElementById('pig-anim');
-                const statusTxt = document.getElementById('pig-status-text');
-                const badge = document.getElementById('pig-chainage-badge');
-                const progTxt = document.getElementById('progress-text');
-                const distUnit = document.getElementById('sel-dist-unit').value; 
-
-                if(!launchVal || totalTravelHours <= 0) {
-                    container.style.left = "0%";
-                    container.style.transform = "translate(0%, -50%)";
-                    statusTxt.innerText = "Ready";
-                    const uStart = getVal('inp-ch-start') || 0;
-                    badge.innerText = `${uStart.toFixed(3)} ${distUnit}`;
-                    requestAnimationFrame(animate);
-                    return;
                 }
 
-                const now = new Date().getTime();
-                const launch = new Date(launchVal).getTime();
-                const duration = totalTravelHours * 3600000;
-                const elapsed = now - launch;
-
-                let pct = 0;
-                let curKm = 0;
-
-                if(elapsed < 0) {
-                    pct = 0;
-                    curKm = launcherKm;
-                    statusTxt.innerText = "Scheduled";
-                    statusTxt.style.color = "#60a5fa";
-                } else if (elapsed >= duration) {
-                    pct = 100;
-                    curKm = receiverKm;
-                    statusTxt.innerText = "Arrived";
-                    statusTxt.style.color = "#34d399";
-                } else {
-                    pct = (elapsed / duration) * 100;
-                    curKm = launcherKm + ((receiverKm - launcherKm) * (pct / 100));
-                    statusTxt.innerText = "In Transit";
-                    statusTxt.style.color = "#facc15";
-                }
-
-                container.style.left = `${pct}%`;
-                container.style.transform = "translate(-50%, -50%)";
+                // --- 1. THEORETICAL VELOCITY (From Flow) ---
+                let pigVelMs = 0;
+                let qActM3Day = 0;
+                let pAvgKg = 0;
+                let zFactor = 0;
                 
-                let curUserUnit = converters.distance.fromBase(curKm, distUnit);
-                badge.innerText = `${curUserUnit.toFixed(3)} ${distUnit}`;
-                progTxt.innerText = `${pct.toFixed(1)}%`;
+                let usingActuals = false;
+                let lastConfirmedKm = launcherKm;
+                let lastConfirmedTime = null;
 
+                if(!isNaN(rawFlow) && areaSqM > 0 && pipelineLengthKm > 0) {
+                    if (currentMode === 'gas') {
+                        const sg = getVal('inp-sg');
+                        if(!isNaN(pinKg) && !isNaN(poutKg) && !isNaN(tempC) && !isNaN(sg)) {
+                            let flowScmh = rawFlow;
+                            const unitFlow = document.getElementById('sel-flow-unit').value;
+                            if(unitFlow === 'mmscfd') flowScmh = rawFlow * 1179.87;
+
+                            const qStd = flowScmh * SCMH_TO_SCFD;
+                            const pInPsia = (pinKg * KGCM2_TO_PSI) + 14.7;
+                            const pOutPsia = (poutKg * KGCM2_TO_PSI) + 14.7;
+                            const tempR = (tempC * 9/5) + 32 + 460;
+                            const pAvgPsia = (2/3) * (pInPsia + pOutPsia - ((pInPsia * pOutPsia) / (pInPsia + pOutPsia)));
+                            pAvgKg = pAvgPsia / KGCM2_TO_PSI;
+                            const num = (pAvgPsia - 14.7) * 344400 * Math.pow(10, 1.785 * sg);
+                            zFactor = 1 / (1 + (num / Math.pow(tempR, 3.825)));
+                            const qActCfDay = qStd * (STANDARD_PRESSURE_PSIA / pAvgPsia) * (tempR / STANDARD_TEMP_R) * zFactor;
+                            qActM3Day = qActCfDay * CFT_TO_M3;
+                        }
+                    } else {
+                        const unitFlow = document.getElementById('sel-flow-unit').value;
+                        let qM3Hr = rawFlow;
+                        if(unitFlow === 'bblday') {
+                            qM3Hr = rawFlow * 0.1589873 / 24;
+                        }
+                        qActM3Day = qM3Hr * 24;
+                    }
+
+                    if(qActM3Day > 0 && areaSqM > 0) {
+                        const vel = (qActM3Day / 86400) / areaSqM;
+                        pigVelMs = vel * eff;
+                    }
+                }
+
+                // --- 2. ACTUAL VELOCITY FROM SV STATIONS ---
+                const launchVal = document.getElementById('inp-launch').value;
+                let sortedWps = [];
+                if(waypoints.length > 0) {
+                    sortedWps = waypoints.filter(w => w.km !== "" && !isNaN(parseFloat(w.km)))
+                        .map(w => ({ ...w, kmVal: converters.distance.toBase(parseFloat(w.km), distUnit) }))
+                        .sort((a,b) => a.kmVal - b.kmVal);
+
+                    const actualWps = sortedWps.filter(w => w.actualTime);
+                    if(launchVal && actualWps.length > 0) {
+                        const launchMs = new Date(launchVal).getTime();
+                        const last = actualWps[actualWps.length - 1];
+                        const lastMs = new Date(last.actualTime).getTime();
+                        const dtSec = (lastMs - launchMs) / 1000;
+                        const dxKm = Math.abs(last.kmVal - launcherKm);
+
+                        if(dtSec > 0 && dxKm > 0) {
+                            const vActual = (dxKm * 1000) / dtSec;
+                            pigVelMs = vActual;
+                            usingActuals = true;
+                            lastConfirmedKm = last.kmVal;
+                            lastConfirmedTime = lastMs;
+                        }
+                    }
+                }
+
+                // --- 3. OUTPUTS & ANIMATION STATE ---
+                // UI UPDATE ---
+                const pigVelKmh = pigVelMs * 3.6;
+                document.getElementById('out-vel-ms').innerText = pigVelMs.toFixed(2);
+                document.getElementById('out-vel-kmh').innerText = pigVelKmh.toFixed(2);
+                
+                const velCard = document.getElementById('card-velocity');
+                const velLabel = document.getElementById('label-velocity');
+                if (usingActuals) {
+                    velCard.classList.remove('dash-blue');
+                    velCard.classList.add('dash-amber');
+                    velLabel.innerText = "Velocity (Actual)";
+                } else {
+                    velCard.classList.remove('dash-amber');
+                    velCard.classList.add('dash-blue');
+                    velLabel.innerText = "Velocity (Calc)";
+                }
+
+                if(currentMode === 'gas') {
+                    document.getElementById('out-pavg').innerText = pAvgKg.toFixed(2);
+                    document.getElementById('out-z').innerText = zFactor > 0 ? zFactor.toFixed(4) : "0.000";
+                }
+                document.getElementById('out-qact').innerText = Math.round(qActM3Day).toLocaleString();
+
+                const totalDistKm = Math.abs(receiverKm - launcherKm);
+                const remDistKm = Math.abs(receiverKm - lastConfirmedKm); 
+                
+                if (pigVelMs > 0 && launchVal) {
+                    const remSeconds = (remDistKm * 1000) / pigVelMs;
+                    const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (remSeconds * 1000);
+                    const arrivalDate = new Date(etaMs);
+                    
+                    totalTravelHours = (etaMs - new Date(launchVal).getTime()) / 3600000;
+
+                    document.getElementById('out-eta-time').innerText = arrivalDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                    document.getElementById('out-eta-date').innerText = arrivalDate.toLocaleDateString();
+                    
+                    let h = Math.floor(totalTravelHours);
+                    let m = Math.round((totalTravelHours - h) * 60);
+                    if(m === 60) { m = 0; h++; }
+                    document.getElementById('out-time-hhmm').innerText = `${h}:${m.toString().padStart(2,'0')}`;
+                    document.getElementById('out-time-dec').innerText = totalTravelHours.toFixed(2);
+
+                    const now = new Date();
+                    if (now > arrivalDate) rptData.status = "Completed";
+                    else if (now > new Date(launchVal)) rptData.status = "In Progress";
+                    else rptData.status = "Scheduled";
+
+                } else {
+                    document.getElementById('out-time-hhmm').innerText = "--:--";
+                    document.getElementById('out-eta-time').innerText = "--:--";
+                    totalTravelHours = 0;
+                    rptData.status = "Planning";
+                }
+
+                // --- 4. WAYPOINT / SV LIST UPDATE ---
+                const wpTableBody = document.getElementById('wp-result-body');
+                const wpCard = document.getElementById('card-wp-results');
+                wpTableBody.innerHTML = "";
+
+                if (sortedWps.length > 0 && pigVelMs > 0 && launchVal) {
+                    wpCard.style.display = 'block';
+                    const now = new Date();
+
+                    sortedWps.forEach(wp => {
+                        const tr = document.createElement('tr');
+                        let statusHtml = '';
+                        let timeDisplay = '';
+
+                        if (wp.actualTime) {
+                            const actDate = new Date(wp.actualTime);
+                            timeDisplay = `<span style="color:#fbbf24">${actDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span><br><span style="font-size:0.7em; color:#64748b">${actDate.toLocaleDateString()}</span>`;
+                            statusHtml = `<span class="status-badge status-confirmed">Confirmed</span>`;
+                        } else {
+                            const distFromLauncher = Math.abs(wp.kmVal - launcherKm);
+                            const distLastConf = Math.abs(lastConfirmedKm - launcherKm);
+                            
+                            if (distFromLauncher < distLastConf) {
+                                timeDisplay = '--:--';
+                                statusHtml = `<span class="status-badge" style="color:#64748b; border:1px solid #475569">Passed?</span>`;
+                            } else {
+                                const distFromLast = Math.abs(wp.kmVal - lastConfirmedKm);
+                                const secondsFromLast = (distFromLast * 1000) / pigVelMs;
+                                const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (secondsFromLast * 1000);
+                                const etaDate = new Date(etaMs);
+                                
+                                timeDisplay = `${etaDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}<br><span style="font-size:0.7em; color:#64748b">${etaDate.toLocaleDateString()}</span>`;
+                                
+                                const isPassed = now > etaDate;
+                                statusHtml = `<span class="status-badge ${isPassed ? 'status-passed' : 'status-coming'}">${isPassed ? 'Crossed' : 'ETA'}</span>`;
+                            }
+                        }
+
+                        tr.innerHTML = `
+                            <td style="font-weight:bold; color:white;">${wp.name || 'SV'}</td>
+                            <td class="mono">${wp.km} ${distUnit}</td>
+                            <td class="mono">${timeDisplay}</td>
+                            <td>${statusHtml}</td>
+                        `;
+                        wpTableBody.appendChild(tr);
+
+                        let posPct = (Math.abs(wp.kmVal - launcherKm) / pipelineLengthKm) * 100;
+                        if (posPct >= 0 && posPct <= 100) {
+                            const tick = document.createElement('div');
+                            tick.className = 'wp-tick';
+                            tick.style.left = `${posPct}%`;
+                            tick.setAttribute('data-name', wp.name || wp.km);
+                            if(wp.actualTime) tick.style.background = '#fbbf24'; 
+                            document.getElementById('pipeline-vis').appendChild(tick);
+                        }
+                    });
+
+                } else {
+                    if (sortedWps.length === 0) wpCard.style.display = 'none';
+                }
+
+                // 5. SAFETY CHECK
+                if (pigVelMs > 5) { // > 5 m/s
+                    addMessage('warn', `High Velocity Warning: ${pigVelMs.toFixed(2)} m/s exceeds standard safety limits.`, null);
+                    document.getElementById('card-velocity').classList.add('dash-amber'); 
+                }
+
+                const safeVel = pigVelMs > 0 ? pigVelMs : 0.5;
+                const dur = Math.max(0.2, 2 - (safeVel * 0.2));
+                document.getElementById('flow-anim').style.animationDuration = `${dur}s`;
+
+            } catch(e) { console.error(e); }
+        }
+
+        // --- ANIMATION ---
+        function animate() {
+            const launchVal = document.getElementById('inp-launch').value;
+            const container = document.getElementById('pig-anim');
+            const statusTxt = document.getElementById('pig-status-text');
+            const badge = document.getElementById('pig-chainage-badge');
+            const progTxt = document.getElementById('progress-text');
+            const distUnit = document.getElementById('sel-dist-unit').value; 
+
+            if(!launchVal || totalTravelHours <= 0) {
+                container.style.left = "0%";
+                container.style.transform = "translate(0%, -50%)";
+                statusTxt.innerText = "Ready";
+                const uStart = getVal('inp-ch-start') || 0;
+                badge.innerText = `${uStart.toFixed(3)} ${distUnit}`;
                 requestAnimationFrame(animate);
+                return;
             }
 
-            // --- LISTENERS ---
-            init();
-            document.querySelectorAll('.calc-trigger').forEach(el => {
-                el.addEventListener('input', calculate);
-                el.addEventListener('change', calculate);
-            });
-            document.querySelectorAll('.unit-change-trigger').forEach(el => {
-                el.addEventListener('change', handleUnitChange);
-            });
+            const now = new Date().getTime();
+            const launch = new Date(launchVal).getTime();
+            const duration = totalTravelHours * 3600000;
+            const elapsed = now - launch;
+
+            let pct = 0;
+            let curKm = 0;
+
+            if(elapsed < 0) {
+                pct = 0;
+                curKm = launcherKm;
+                statusTxt.innerText = "Scheduled";
+                statusTxt.style.color = "#60a5fa";
+            } else if (elapsed >= duration) {
+                pct = 100;
+                curKm = receiverKm;
+                statusTxt.innerText = "Arrived";
+                statusTxt.style.color = "#34d399";
+            } else {
+                pct = (elapsed / duration) * 100;
+                curKm = launcherKm + ((receiverKm - launcherKm) * (pct / 100));
+                statusTxt.innerText = "In Transit";
+                statusTxt.style.color = "#facc15";
+            }
+
+            container.style.left = `${pct}%`;
+            container.style.transform = "translate(-50%, -50%)";
+            
+            let curUserUnit = converters.distance.fromBase(curKm, distUnit);
+            badge.innerText = `${curUserUnit.toFixed(3)} ${distUnit}`;
+            progTxt.innerText = `${pct.toFixed(1)}%`;
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- GLOBAL INPUT GUARDS (key / paste / blur) ---
+
+        function isNumericInput(el) {
+            return el && el.tagName === 'INPUT' &&
+                   el.type === 'number' &&
+                   (el.classList.contains('input-field') || el.classList.contains('wp-input'));
+        }
+
+        // Block e, E, +
+        document.addEventListener('keydown', function (e) {
+            if (!isNumericInput(e.target)) return;
+            if (e.key === 'e' || e.key === 'E' || e.key === '+') {
+                e.preventDefault();
+            }
+        }, true);
+
+        // Block paste in all input fields (.input-field and .wp-input)
+        document.addEventListener('paste', function (e) {
+            const t = e.target;
+            if (t && t.classList && (t.classList.contains('input-field') || t.classList.contains('wp-input'))) {
+                e.preventDefault();
+            }
+        }, true);
+
+        // Also block drag-drop (acts like paste in most browsers)
+        document.addEventListener('drop', function (e) {
+            const t = e.target;
+            if (t && t.classList && (t.classList.contains('input-field') || t.classList.contains('wp-input'))) {
+                e.preventDefault();
+            }
+        }, true);
+
+        // Auto-clamp on blur + safe minimum when cleared
+        document.addEventListener('blur', function (e) {
+            const t = e.target;
+            if (!isNumericInput(t)) return;
+
+            clampInputValue(t);
+
+            if (t.classList.contains('calc-trigger')) {
+                calculate();
+            }
+        }, true);
+
+        // --- LISTENERS ---
+        init();
+        document.querySelectorAll('.calc-trigger').forEach(el => {
+            el.addEventListener('input', calculate);
+            el.addEventListener('change', calculate);
         });
-    </script>
+        document.querySelectorAll('.unit-change-trigger').forEach(el => {
+            el.addEventListener('change', handleUnitChange);
+        });
+    });
+</script>
+<footer id="copyright-scroll">
+    <span class="copyright-inner">
+        Designed & Developed by Ramakrishna Mullapudi © 2025
+    </span>
+</footer>
 </body>
 </html>
