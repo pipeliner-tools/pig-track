@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pig Velocity & ETA Calculator</title>
-    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -654,14 +653,12 @@
 
     <div class="container">
         
-        <!-- Header -->
         <div class="header-bar">
             <div class="header-title">
                 <h1>Pig Velocity & ETA Calculator</h1>
                 <p> Mobile Friendly Version</p>
             </div>
             
-            <!-- Unified Menu -->
             <div class="menu-container">
                 <button class="btn-menu" onclick="toggleMenu()" title="Menu">
                     <i class="fas fa-ellipsis-v"></i>
@@ -680,18 +677,34 @@
             </div>
         </div>
 
-        <!-- NEW: VALIDATION CONSOLE -->
         <div id="validation-console"></div>
-
-        <!-- LEFT COLUMN: Inputs -->
-        <div class="col-inputs">
+                <div class="col-inputs">
             
-            <!-- Geometry -->
-            <div class="card">
+                                    <div class="card">
                 <div class="section-header">Pipeline Geometry</div>
+                
+                <div class="grid-2" style="margin-bottom: 10px; border-bottom: 1px dashed #334155; padding-bottom: 10px;">
+                    <div class="input-group">
+                        <label>Nominal Pipe Size (NPS)</label>
+                        <div class="input-wrapper">
+                            <select id="sel-nps" class="select-primary">
+                                <option value="" disabled selected>Loading...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Standard Thickness</label>
+                        <div class="input-wrapper">
+                            <select id="sel-std-wt" class="select-primary">
+                                <option value="" disabled selected>Select NPS First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid-2">
                     <div class="input-group">
-                        <label>Outer Diameter</label>
+                        <label>Outer Diameter (OD)</label>
                         <div class="input-wrapper">
                             <input type="number" id="inp-od" class="input-field calc-trigger" value="36" min="2" max="72" step="0.01">
                             <select id="sel-od-unit" class="modern-select unit-change-trigger" data-input="inp-od" data-type="length">
@@ -701,9 +714,9 @@
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Wall Thickness</label>
+                        <label>Wall Thickness (Custom)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="inp-wt" class="input-field calc-trigger" value="12.7" min="5" max="50" step="0.1">
+                            <input type="number" id="inp-wt" class="input-field calc-trigger" value="12.7" min="1" max="100" step="0.1">
                             <select id="sel-wt-unit" class="modern-select unit-change-trigger" data-input="inp-wt" data-type="length">
                                 <option value="mm">mm</option>
                                 <option value="inch">inch</option>
@@ -711,9 +724,10 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="input-group">
-                    <label>Inner Diameter (Calculated)</label>
-                    <div class="read-only-val" id="val-id"><strong>889</strong> mm</div>
+                    <label>Inner Diameter (ID)</label>
+                    <div class="read-only-val" id="val-id"><strong>-</strong> mm</div>
                 </div>
                 
                 <div class="grid-2" style="margin-top:10px; border-top:1px solid #334155; padding-top:10px;">
@@ -738,15 +752,13 @@
                 </div>
                 <div class="input-group">
                     <label>Section Length</label>
-                    <div class="read-only-val"><span id="val-length"><strong>80.3</strong></span> km</div>
+                    <div class="read-only-val"><span id="val-length"><strong>-</strong></span> km</div>
                 </div>
             </div>
 
-            <!-- Operating Conditions -->
             <div class="card">
                 <div class="section-header">
                     <span>Operating Conditions</span>
-                    <!-- Mode Toggle -->
                     <div class="toggle-container">
                         <button class="toggle-btn active" id="btn-mode-gas" onclick="setMode('gas')">Gas</button>
                         <button class="toggle-btn" id="btn-mode-liquid" onclick="setMode('liquid')">Liquid</button>
@@ -758,8 +770,7 @@
                     <div class="input-wrapper">
                         <input type="number" id="inp-flow" class="input-field calc-trigger" value="300000" min="0" max="2000000" step="1000">
                         <select id="sel-flow-unit" class="modern-select unit-change-trigger" data-input="inp-flow" data-type="flow">
-                            <!-- Populated dynamically via JS -->
-                        </select>
+                            </select>
                     </div>
                 </div>
                 <div class="grid-2">
@@ -794,7 +805,6 @@
                         </div>
                     </div>
                     
-                    <!-- GAS ONLY -->
                     <div class="input-group" id="group-sg">
                         <label>Specific Gravity</label>
                         <div class="input-wrapper">
@@ -802,7 +812,6 @@
                         </div>
                     </div>
                     
-                    <!-- LIQUID ONLY -->
                     <div class="input-group hidden" id="group-visc">
                         <label>Viscosity (cP)</label>
                         <div class="input-wrapper">
@@ -812,7 +821,6 @@
                 </div>
             </div>
 
-            <!-- Ops (Updated for Pig Slip Factor) -->
             <div class="card">
                 <div class="section-header">Pigging Data</div>
                 <div class="input-group">
@@ -821,7 +829,6 @@
                         <input type="datetime-local" id="inp-launch" class="input-field calc-trigger">
                     </div>
                 </div>
-                <!-- NEW GRID -->
                 <div class="grid-2">
                     <div class="input-group">
                         <label>Pig Type</label>
@@ -851,21 +858,16 @@
                 </div>
             </div>
 
-            <!-- SV Stations Input -->
             <div class="card">
                 <div class="section-header">SV Stations</div>
                 <div id="wp-list">
-                    <!-- Dynamic Rows Go Here -->
-                </div>
+                    </div>
                 <button class="wp-btn-add" onclick="addWaypoint()">+ Add SV</button>
             </div>
 
         </div>
-
-        <!-- RIGHT COLUMN: Results -->
-        <div class="col-results">
+                <div class="col-results">
             
-            <!-- Dashboard -->
             <div class="dashboard-grid">
                 <div class="dash-card dash-blue" id="card-velocity">
                     <div class="dash-label" id="label-velocity">Velocity (Calc)</div>
@@ -886,7 +888,6 @@
                 </div>
             </div>
 
-            <!-- Live Position -->
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:5px;">
                     <div class="section-header" style="border:none; margin:0; padding:0;">Live Position</div>
@@ -895,9 +896,6 @@
 
                 <div class="pipeline-graphic" id="pipeline-vis">
                     <div class="pipeline-flow" id="flow-anim"></div>
-                    <!-- Ticks inserted here via JS -->
-                    
-                    <!-- Pig Container -->
                     <div class="pig-container" id="pig-anim">
                         <svg class="pig-svg" width="50" height="28" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
                             <ellipse cx="15" cy="30" rx="8" ry="28" fill="#dc2626" stroke="#991b1b" stroke-width="2" />
@@ -917,7 +915,6 @@
                 </div>
             </div>
 
-            <!-- SV Station ETA Results -->
             <div class="card" id="card-wp-results" style="display:none;">
                 <div class="section-header">SV Station ETA</div>
                 <div class="table-responsive">
@@ -931,13 +928,11 @@
                             </tr>
                         </thead>
                         <tbody id="wp-result-body">
-                            <!-- Filled by JS -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Parameters Table -->
             <div class="card">
                 <div class="section-header" id="label-details">Calculation Details (AGA / CNGA)</div>
                 <div class="table-responsive">
@@ -978,10 +973,8 @@
         </div>
     </div>
 
-    <!-- TOAST -->
     <div id="toast">Link copied to clipboard!</div>
 
-    <!-- MODAL -->
     <div id="modal-scenarios" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -995,12 +988,10 @@
             </div>
 
             <div class="scenario-list" id="list-scenarios">
-                <!-- Items -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- PRINT REPORT TEMPLATE (Hidden unless printing) -->
     <div id="report-view">
         <div class="rpt-header">
             <div class="rpt-title">
@@ -1066,8 +1057,7 @@
                     </tr>
                 </thead>
                 <tbody id="rpt-sv-body">
-                    <!-- Populated by JS -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
@@ -1080,6 +1070,57 @@
     let currentMode = 'gas'; 
     let waypoints = []; // Array of {id, name, km, actualTime}
     let savedScenarios = []; // Array of {id, name, date, data}
+
+    // --- 1. NPS & THICKNESS DATA (From pig-sizing.html) ---
+    const NPS_DATA = {
+      "4":  { odIn: 4.5,   odMm: 114.3 },
+      "5":  { odIn: 5.563, odMm: 141.3 },
+      "6":  { odIn: 6.625, odMm: 168.3 },
+      "8":  { odIn: 8.625, odMm: 219.1 },
+      "10": { odIn: 10.75, odMm: 273.0 },
+      "12": { odIn: 12.75, odMm: 323.9 },
+      "14": { odIn: 14.0,  odMm: 355.6 },
+      "16": { odIn: 16.0,  odMm: 406.4 },
+      "18": { odIn: 18.0,  odMm: 457.2 },
+      "20": { odIn: 20.0,  odMm: 508.0 },
+      "22": { odIn: 22.0,  odMm: 558.8 },
+      "24": { odIn: 24.0,  odMm: 609.6 },
+      "26": { odIn: 26.0,  odMm: 660.4 },
+      "28": { odIn: 28.0,  odMm: 711.2 },
+      "30": { odIn: 30.0,  odMm: 762.0 },
+      "32": { odIn: 32.0,  odMm: 812.8 },
+      "34": { odIn: 34.0,  odMm: 863.6 },
+      "36": { odIn: 36.0,  odMm: 914.4 },
+      "38": { odIn: 38.0,  odMm: 965.2 },
+      "40": { odIn: 40.0,  odMm: 1016.0 },
+      "42": { odIn: 42.0,  odMm: 1067.0 },
+      "44": { odIn: 44.0,  odMm: 1118.0 },
+      "46": { odIn: 46.0,  odMm: 1168.0 },
+      "48": { odIn: 48.0,  odMm: 1219.0 }
+    };
+
+    const largeWallInches = [
+      0.188, 0.203, 0.219, 0.250, 0.281, 0.312, 0.344, 0.375, 0.406, 0.438, 0.469, 
+      0.500, 0.562, 0.594, 0.625, 0.688, 0.719, 0.750, 0.812, 0.844, 0.875, 0.906, 
+      0.938, 1.000, 1.031, 1.062, 1.125, 1.188, 1.219, 1.250, 1.281, 1.312, 1.375, 
+      1.438, 1.500, 1.750, 1.969
+    ];
+
+    const THICKNESS_INCH = {
+      "4": [0.083, 0.109, 0.120, 0.125, 0.141, 0.156, 0.172, 0.188, 0.203, 0.219, 0.237, 0.250, 0.281, 0.312, 0.337, 0.438, 0.531, 0.674],
+      "5": [0.083, 0.109, 0.125, 0.134, 0.156, 0.188, 0.219, 0.258, 0.281, 0.312, 0.344, 0.375, 0.500, 0.625, 0.750],
+      "6": [0.083, 0.109, 0.125, 0.134, 0.141, 0.156, 0.172, 0.188, 0.203, 0.219, 0.250, 0.280, 0.312, 0.344, 0.375, 0.432, 0.500, 0.562, 0.625, 0.719, 0.750, 0.864, 0.875],
+      "8": [0.109, 0.125, 0.148, 0.156, 0.188, 0.203, 0.219, 0.250, 0.277, 0.312, 0.322, 0.344, 0.375, 0.406, 0.438, 0.500, 0.562, 0.594, 0.625, 0.719, 0.750, 0.812, 0.875, 0.906, 1.000, 1.125],
+      "10": [0.134, 0.156, 0.165, 0.188, 0.203, 0.219, 0.250, 0.279, 0.307, 0.344, 0.365, 0.438, 0.500, 0.562, 0.594, 0.625, 0.719, 0.812, 0.844, 0.875, 0.938, 1.000, 1.125, 1.250, 1.375, 1.438],
+      "12": [0.156, 0.172, 0.180, 0.188, 0.203, 0.219, 0.250, 0.281, 0.312, 0.330, 0.344, 0.375, 0.406, 0.438, 0.500, 0.562, 0.625, 0.688, 0.750, 0.812, 0.844, 0.875, 0.938, 1.000, 1.062, 1.125, 1.250, 1.312, 1.375, 1.500],
+      "14": largeWallInches, "16": largeWallInches, "18": largeWallInches, "20": largeWallInches,
+      "22": largeWallInches, "24": largeWallInches, "26": largeWallInches, "28": largeWallInches,
+      "30": largeWallInches, "32": largeWallInches, "34": largeWallInches, "36": largeWallInches,
+      "38": largeWallInches, "40": largeWallInches, "42": largeWallInches, "44": largeWallInches,
+      "46": largeWallInches, "48": largeWallInches
+    };
+
+    const inToMm = (inches) => (inches * 25.4);
 
     document.addEventListener('DOMContentLoaded', () => {
         
@@ -1114,7 +1155,7 @@
             liquid: [{val: 'm3hr', label: 'm³/hr'}, {val: 'bblday', label: 'bbl/day'}]
         };
         
-        // NEW: PIG PRESETS
+        // PIG PRESETS
         const pigPresets = {
             'smart': 99.5,
             'bidi': 99.0,
@@ -1137,7 +1178,93 @@
             const el = document.getElementById(id);
             return el ? parseFloat(el.value) : NaN;
         }
+
+        // --- NEW: NPS & WT DROPDOWN LOGIC ---
         
+        function initNps() {
+            const npsSel = document.getElementById('sel-nps');
+            if(!npsSel) return;
+            
+            npsSel.innerHTML = '<option value="" disabled selected>NPS</option>';
+            
+            Object.entries(NPS_DATA)
+                .sort((a, b) => Number(a[0]) - Number(b[0]))
+                .forEach(([nps, data]) => {
+                    const opt = document.createElement("option");
+                    opt.value = nps;
+                    opt.textContent = `NPS ${nps}"`;
+                    npsSel.appendChild(opt);
+                });
+            
+            // Listener
+            npsSel.addEventListener('change', handleNpsChange);
+            
+            // Listener for Standard WT
+            const wtSel = document.getElementById('sel-std-wt');
+            if(wtSel) {
+                wtSel.addEventListener('change', handleStdWtChange);
+            }
+        }
+
+        function handleNpsChange() {
+            const npsSel = document.getElementById('sel-nps');
+            const npsVal = npsSel.value;
+            if(!npsVal || !NPS_DATA[npsVal]) return;
+
+            const data = NPS_DATA[npsVal];
+            
+            // 1. Set OD based on current Unit
+            const odInput = document.getElementById('inp-od');
+            const odUnit = document.getElementById('sel-od-unit').value;
+            
+            let valToSet = (odUnit === 'inch') ? data.odIn : data.odMm;
+            odInput.value = valToSet.toFixed(3);
+            
+            // 2. Populate Standard Thicknesses
+            populateStdWt(npsVal);
+            
+            // 3. Trigger Calc
+            calculate();
+        }
+
+        function populateStdWt(npsKey) {
+            const wtSel = document.getElementById('sel-std-wt');
+            if(!wtSel) return;
+
+            wtSel.innerHTML = '<option value="" disabled selected>Select WT</option>';
+            const inches = THICKNESS_INCH[npsKey] || [];
+            
+            // We store the values in INCH in the option value for consistency
+            // We display based on the current WT unit preference if possible, 
+            // but usually standard schedules are defined in specific units. 
+            // Let's display both "mm / in" in the dropdown for clarity.
+            
+            const uniqueInches = Array.from(new Set(inches)).sort((a,b) => a-b);
+            
+            uniqueInches.forEach(inchVal => {
+                const mmVal = inToMm(inchVal);
+                const opt = document.createElement('option');
+                opt.value = inchVal; // Store INCH value
+                opt.innerText = `${mmVal.toFixed(2)} mm (${inchVal.toFixed(3)}")`;
+                wtSel.appendChild(opt);
+            });
+        }
+
+        function handleStdWtChange() {
+            const wtSel = document.getElementById('sel-std-wt');
+            const inchVal = parseFloat(wtSel.value);
+            if(isNaN(inchVal)) return;
+            
+            // Set WT based on current Unit
+            const wtInput = document.getElementById('inp-wt');
+            const wtUnit = document.getElementById('sel-wt-unit').value;
+            
+            let valToSet = (wtUnit === 'inch') ? inchVal : inToMm(inchVal);
+            wtInput.value = valToSet.toFixed(2);
+            
+            calculate();
+        }
+
         // PIG SELECT LISTENER
         const pigSelect = document.getElementById('sel-pig-type');
         const effInput = document.getElementById('inp-eff');
@@ -1155,12 +1282,10 @@
 
         // --- VALIDATION HELPERS ---
         function clearValidation() {
-            // Clear global messages
             const consoleEl = document.getElementById('validation-console');
             consoleEl.innerHTML = '';
             consoleEl.style.display = 'none';
 
-            // Remove red/amber borders from all inputs
             document.querySelectorAll('.input-field, .wp-input').forEach(el => {
                 el.classList.remove('input-error', 'input-warning');
             });
@@ -1212,13 +1337,13 @@
                 isValid = false;
             }
 
-            // 5. TEMPERATURE CHECK (just NaN handling; ranges enforced elsewhere)
+            // 5. TEMPERATURE CHECK
             if (isNaN(vals.tempC)) {
                 addMessage('error', 'Temperature must be a valid number.', 'inp-temp');
                 isValid = false;
             }
 
-            // 6. WAYPOINT LOGIC (Location & Time Consistency)
+            // 6. WAYPOINT LOGIC
             const launchVal = document.getElementById('inp-launch').value;
             const distUnit = document.getElementById('sel-dist-unit').value;
             const startKm = vals.startKm;
@@ -1235,13 +1360,11 @@
                     if (wp.actualTime) {
                         const svTime = new Date(wp.actualTime).getTime();
                         
-                        // Check: Arrival before Launch
                         if (svTime <= launchTime) {
                             addMessage('error', `Time Paradox: Station '${wp.name || 'SV'}' marked as arrived before Launch Time.`, null);
                             isValid = false;
                         }
                         
-                        // Check: Future Time
                         if (svTime > now) {
                             addMessage('error', `Future Date Error: Station '${wp.name || 'SV'}' actual arrival time cannot be in the future.`, null);
                             isValid = false;
@@ -1252,10 +1375,7 @@
                     if (wp.km !== "") {
                         let wpKm = parseFloat(wp.km);
                         if(!isNaN(wpKm)) {
-                            // Convert raw input to base KM for comparison
                             const wpKmBase = converters.distance.toBase(wpKm, distUnit);
-                            
-                            // Allow small float tolerance
                             if((wpKmBase < minKm - 0.1) || (wpKmBase > maxKm + 0.1)) {
                                 addMessage('error', `Location Error: Station '${wp.name || 'SV'}' (${wp.km}) is outside the pipeline limits (Start-End).`, null);
                                 isValid = false;
@@ -1291,8 +1411,8 @@
             flow: {
                 base: 'base_flow', 
                 toBase: (v, u) => {
-                    if(currentMode === 'gas') return u === 'mmscfd' ? v * 1179.87 : v; // base ~ SCMH-equivalent
-                    if(currentMode === 'liquid') return u === 'bblday' ? v * 0.1589873 / 24 : v; // base ~ m3/hr-equivalent
+                    if(currentMode === 'gas') return u === 'mmscfd' ? v * 1179.87 : v;
+                    if(currentMode === 'liquid') return u === 'bblday' ? v * 0.1589873 / 24 : v;
                     return v;
                 },
                 fromBase: (v, u) => {
@@ -1322,159 +1442,41 @@
         };
 
         // --- RANGE CONFIG & CLAMPING ---
-
-        // Limits are defined in the *current input unit* where possible.
         const rangeConfig = {
-            // Outer Diameter: 2 in – 72 in
             'inp-od': {
-                getMin() {
-                    const u = document.getElementById('sel-od-unit').value;
-                    return u === 'inch' ? 2 : 2 * 25.4; // 50.8 mm
-                },
-                getMax() {
-                    const u = document.getElementById('sel-od-unit').value;
-                    return u === 'inch' ? 72 : 72 * 25.4; // 1828.8 mm
-                },
-                safeMin() {
-                    const u = document.getElementById('sel-od-unit').value;
-                    return u === 'inch' ? 2 : 2 * 25.4;
-                }
+                getMin() { const u = document.getElementById('sel-od-unit').value; return u === 'inch' ? 2 : 2 * 25.4; },
+                getMax() { const u = document.getElementById('sel-od-unit').value; return u === 'inch' ? 72 : 72 * 25.4; },
+                safeMin() { const u = document.getElementById('sel-od-unit').value; return u === 'inch' ? 2 : 2 * 25.4; }
             },
-
-            // Wall Thickness: 5 mm – 50 mm
             'inp-wt': {
-                getMin() {
-                    const u = document.getElementById('sel-wt-unit').value;
-                    return u === 'mm' ? 5 : 5 / 25.4; // ≈0.197 in
-                },
-                getMax() {
-                    const u = document.getElementById('sel-wt-unit').value;
-                    return u === 'mm' ? 50 : 50 / 25.4; // ≈1.97 in
-                },
-                safeMin() {
-                    const u = document.getElementById('sel-wt-unit').value;
-                    return u === 'mm' ? 5 : 5 / 25.4;
-                }
+                getMin() { const u = document.getElementById('sel-wt-unit').value; return u === 'mm' ? 1 : 1 / 25.4; },
+                getMax() { const u = document.getElementById('sel-wt-unit').value; return u === 'mm' ? 60 : 60 / 25.4; },
+                safeMin() { const u = document.getElementById('sel-wt-unit').value; return u === 'mm' ? 5 : 5 / 25.4; }
             },
-
-            // Chainage: 0 – 2500 km (applies to launcher & receiver)
-            'inp-ch-start': {
-                getMin() { return 0; },
-                getMax() {
-                    const u = document.getElementById('sel-dist-unit').value;
-                    if (u === 'km')   return 2500;
-                    if (u === 'mile') return 2500 / 1.60934;
-                    if (u === 'm')    return 2500 * 1000;
-                    return 2500;
-                },
-                safeMin() { return 0; }
-            },
-            'inp-ch-end': {
-                getMin() { return 0; },
-                getMax() {
-                    const u = document.getElementById('sel-dist-unit').value;
-                    if (u === 'km')   return 2500;
-                    if (u === 'mile') return 2500 / 1.60934;
-                    if (u === 'm')    return 2500 * 1000;
-                    return 2500;
-                },
-                safeMin() { return 0; }
-            },
-
-            // Flow Rate: 0 – 2,000,000 SCMH
-            'inp-flow': {
-                getMin() { return 0; },
-                getMax() {
-                    const unit = document.getElementById('sel-flow-unit').value;
-                    if (currentMode === 'gas') {
-                        // base = SCMH-equivalent
-                        const maxBase = 2_000_000;
-                        return converters.flow.fromBase(maxBase, unit);
-                    } else {
-                        // liquid: numeric guardrail only
-                        return 2_000_000;
-                    }
-                },
-                safeMin() { return 0; }
-            },
-
-            // Pressure: 0 – 300 kg/cm²
-            'inp-pin': {
-                getMin() { return 0; },
-                getMax() {
-                    const unit = document.getElementById('sel-press-unit').value;
-                    const maxKg = 300;
-                    return converters.pressure.fromBase(maxKg, unit);
-                },
-                safeMin() { return 0; }
-            },
-            'inp-pout': {
-                getMin() { return 0; },
-                getMax() {
-                    const unit = document.getElementById('sel-press-unit').value;
-                    const maxKg = 300;
-                    return converters.pressure.fromBase(maxKg, unit);
-                },
-                safeMin() { return 0; }
-            },
-
-            // Temperature: 0 – 150 °C
-            'inp-temp': {
-                getMin() {
-                    const unit = document.getElementById('sel-temp-unit').value;
-                    return converters.temp.fromBase(0, unit); // 0°C
-                },
-                getMax() {
-                    const unit = document.getElementById('sel-temp-unit').value;
-                    return converters.temp.fromBase(150, unit); // 150°C
-                },
-                safeMin() {
-                    const unit = document.getElementById('sel-temp-unit').value;
-                    return converters.temp.fromBase(0, unit);
-                }
-            },
-
-            // Specific Gravity: 0.50 – 2.00
-            'inp-sg': {
-                getMin() { return 0.50; },
-                getMax() { return 2.00; },
-                safeMin() { return 0.50; }
-            },
-
-            // Viscosity: 0.1 – 5000 cP
-            'inp-visc': {
-                getMin() { return 0.1; },
-                getMax() { return 5000; },
-                safeMin() { return 0.1; }
-            },
-
-            // Sealing Efficiency: 10% – 100%
-            'inp-eff': {
-                getMin() { return 10; },
-                getMax() { return 100; },
-                safeMin() { return 10; }
-            }
+            'inp-ch-start': { getMin() { return 0; }, getMax() { return 2500; }, safeMin() { return 0; } },
+            'inp-ch-end': { getMin() { return 0; }, getMax() { return 2500; }, safeMin() { return 0; } },
+            'inp-flow': { getMin() { return 0; }, getMax() { return 2000000; }, safeMin() { return 0; } },
+            'inp-pin': { getMin() { return 0; }, getMax() { return 300; }, safeMin() { return 0; } },
+            'inp-pout': { getMin() { return 0; }, getMax() { return 300; }, safeMin() { return 0; } },
+            'inp-temp': { getMin() { return 0; }, getMax() { return 150; }, safeMin() { return 0; } },
+            'inp-sg': { getMin() { return 0.50; }, getMax() { return 2.00; }, safeMin() { return 0.50; } },
+            'inp-visc': { getMin() { return 0.1; }, getMax() { return 5000; }, safeMin() { return 0.1; } },
+            'inp-eff': { getMin() { return 10; }, getMax() { return 100; }, safeMin() { return 10; } }
         };
 
         function formatNumberForInput(value, el) {
             const stepAttr = el.getAttribute('step');
             let decimals = 2;
-            if (stepAttr && stepAttr.indexOf('.') >= 0) {
-                decimals = stepAttr.split('.')[1].length;
-            } else if (stepAttr && !stepAttr.includes('.')) {
-                decimals = 0;
-            }
+            if (stepAttr && stepAttr.indexOf('.') >= 0) decimals = stepAttr.split('.')[1].length;
+            else if (stepAttr && !stepAttr.includes('.')) decimals = 0;
             return value.toFixed(decimals);
         }
 
-        // Auto-clamp on blur + safe minimum for empty/NaN
         function clampInputValue(el) {
             const cfg = rangeConfig[el.id];
-            if (!cfg) return; // Only clamp configured fields
+            if (!cfg) return;
 
             let raw = (el.value || '').trim();
-
-            // If cleared or non-numeric → safe minimum
             if (raw === '' || isNaN(parseFloat(raw))) {
                 const safe = typeof cfg.safeMin === 'function' ? cfg.safeMin() : cfg.safeMin;
                 el.value = formatNumberForInput(safe, el);
@@ -1487,7 +1489,6 @@
 
             if (typeof min === 'number' && val < min) val = min;
             if (typeof max === 'number' && val > max) val = max;
-
             el.value = formatNumberForInput(val, el);
         }
 
@@ -1551,13 +1552,16 @@
             if(select.id === 'sel-dist-unit') syncDistUnits(newUnit);
             if(select.id === 'sel-press-unit') syncPressUnits(newUnit);
 
-            // Clamp affected inputs after unit change
             inputIds.forEach(id => {
                 const el = document.getElementById(id);
-                if (el && typeof clampInputValue === 'function') {
-                    clampInputValue(el);
-                }
+                if (el && typeof clampInputValue === 'function') clampInputValue(el);
             });
+
+            // Re-sync standard thickness display if unit changed
+            if(select.id === 'sel-wt-unit') {
+                 // Optionally update the text in sel-std-wt here, 
+                 // but simpler to just let the user pick next time.
+            }
 
             calculate();
         }
@@ -1620,7 +1624,6 @@
             }
         }
         
-        // Specialized Clear Function
         window.clearWaypointTime = function(id) {
             const wp = waypoints.find(w => w.id === id);
             if(wp) {
@@ -1641,7 +1644,7 @@
                     <div class="wp-row-main">
                         <input type="text" class="wp-input" style="flex:2" placeholder="Name (e.g. SV-01)" 
                             value="${wp.name || ''}" oninput="updateWaypoint('${wp.id}', 'name', this.value)">
-                        <input type="number" class="wp-input" style="flex:1" placeholder="Loc" 
+                        <input type="number" class="wp-input" style="flex:1" placeholder="km" 
                             value="${wp.km || ''}" oninput="updateWaypoint('${wp.id}', 'km', this.value)">
                         <button class="wp-btn-del" onclick="removeWaypoint('${wp.id}')">&times;</button>
                     </div>
@@ -1683,12 +1686,9 @@
             setTimeout(() => el.classList.remove('show'), 3000);
         }
 
-        // Robust share-link generator (short keys + SV + fallback prompt)
         window.shareLink = function () {
             try {
                 const params = new URLSearchParams();
-
-                // Core mode + inputs (short keys like v2)
                 params.set('mode', currentMode);
                 params.set('od', document.getElementById('inp-od').value);
                 params.set('wt', document.getElementById('inp-wt').value);
@@ -1701,16 +1701,9 @@
                 params.set('eff', document.getElementById('inp-eff').value);
                 params.set('ptype', document.getElementById('sel-pig-type').value);
 
-                // Optional gas / liquid extras
-                if (document.getElementById('inp-sg')) {
-                    params.set('sg', document.getElementById('inp-sg').value);
-                }
-                if (document.getElementById('inp-visc')) {
-                    params.set('visc', document.getElementById('inp-visc').value);
-                }
-                if (document.getElementById('inp-launch')) {
-                    params.set('launch', document.getElementById('inp-launch').value);
-                }
+                if (document.getElementById('inp-sg')) params.set('sg', document.getElementById('inp-sg').value);
+                if (document.getElementById('inp-visc')) params.set('visc', document.getElementById('inp-visc').value);
+                if (document.getElementById('inp-launch')) params.set('launch', document.getElementById('inp-launch').value);
 
                 // Units
                 params.set('u_od',   document.getElementById('sel-od-unit').value);
@@ -1720,13 +1713,12 @@
                 params.set('u_p',    document.getElementById('sel-press-unit').value);
                 params.set('u_t',    document.getElementById('sel-temp-unit').value);
 
-                // SV stations → compact JSON array
+                // Optional: Save NPS Selection
+                const npsSel = document.getElementById('sel-nps');
+                if(npsSel && npsSel.value) params.set('nps', npsSel.value);
+
                 if (waypoints.length > 0) {
-                    const minWps = waypoints.map(w => [
-                        w.name || '',
-                        w.km || '',
-                        w.actualTime || ''
-                    ]);
+                    const minWps = waypoints.map(w => [w.name || '', w.km || '', w.actualTime || '']);
                     params.set('sv', JSON.stringify(minWps));
                 }
 
@@ -1735,113 +1727,64 @@
                 navigator.clipboard.writeText(url).then(() => {
                     showToast("Shareable link copied to clipboard!");
                 }).catch(err => {
-                    console.error(err);
-                    // Fallback so the link is still visible to the user
                     window.prompt("Copy this link:", url);
                 });
             } catch (e) {
-                console.error(e);
                 showToast("Error generating share link.");
             }
         };
 
         function printReport() {
-            // 1) Capture current date/time
             const now = new Date();
-            const dateStr = now.toLocaleDateString();
-            const dateTimeStr = now.toLocaleString();
-
-            // 2) Take status directly from Live Position section
             const liveStatusEl = document.getElementById('pig-status-text');
-            let statusText = 'Ready';
-            if (liveStatusEl && liveStatusEl.textContent.trim() !== '') {
-                statusText = liveStatusEl.textContent.trim();
-            }
+            let statusText = (liveStatusEl && liveStatusEl.textContent.trim() !== '') 
+                             ? liveStatusEl.textContent.trim() : 'Ready';
 
-            // Keep rptData in sync with what user actually sees
-            if (typeof rptData !== 'undefined' && rptData) {
-                rptData.status = statusText;
-            }
+            document.getElementById("rpt-date").textContent = "Date: " + now.toLocaleDateString();
+            document.getElementById("rpt-status").textContent = statusText;
+            document.getElementById("rpt-gen-time").textContent = now.toLocaleString();
 
-            // Update report header meta
-            const rptDateEl = document.getElementById("rpt-date");
-            if (rptDateEl) {
-                rptDateEl.textContent = "Date: " + dateStr;
-            }
+            document.getElementById('rpt-vel').innerText = `${document.getElementById('out-vel-ms').innerText} m/s`;
+            document.getElementById('rpt-time').innerText = document.getElementById('out-time-hhmm').innerText;
+            document.getElementById('rpt-eta').innerText = `${document.getElementById('out-eta-time').innerText} (${document.getElementById('out-eta-date').innerText})`;
 
-            const rptStatusEl = document.getElementById("rpt-status");
-            if (rptStatusEl) {
-                rptStatusEl.textContent = statusText;
-            }
-
-            const rptGenTimeEl = document.getElementById("rpt-gen-time");
-            if (rptGenTimeEl) {
-                rptGenTimeEl.textContent = dateTimeStr;
-            }
-
-            // 3) Fill core numeric results from current UI
-            document.getElementById('rpt-vel').innerText =
-                `${document.getElementById('out-vel-ms').innerText} m/s`;
-            document.getElementById('rpt-time').innerText =
-                document.getElementById('out-time-hhmm').innerText;
-            document.getElementById('rpt-eta').innerText =
-                `${document.getElementById('out-eta-time').innerText} (${document.getElementById('out-eta-date').innerText})`;
-
-            // 4) Geometry
             document.getElementById('rpt-od').innerText = document.getElementById('inp-od').value;
             document.getElementById('rpt-od-u').innerText = document.getElementById('sel-od-unit').value;
             document.getElementById('rpt-wt').innerText = document.getElementById('inp-wt').value;
             document.getElementById('rpt-wt-u').innerText = document.getElementById('sel-wt-unit').value;
             document.getElementById('rpt-id').innerText = document.getElementById('val-id').innerText;
-            document.getElementById('rpt-len').innerText =
-                document.getElementById('val-length').innerText + ' ' +
-                document.getElementById('sel-dist-unit').value;
-            document.getElementById('rpt-vol').innerText =
-                document.getElementById('out-vol').innerText + ' m³';
+            document.getElementById('rpt-len').innerText = document.getElementById('val-length').innerText + ' ' + document.getElementById('sel-dist-unit').value;
+            document.getElementById('rpt-vol').innerText = document.getElementById('out-vol').innerText + ' m³';
 
-            // 5) Operating data
             document.getElementById('rpt-mode').innerText = currentMode;
             document.getElementById('rpt-flow').innerText = document.getElementById('inp-flow').value;
-            document.getElementById('rpt-flow-u').innerText =
-                document.getElementById('sel-flow-unit')
-                        .options[document.getElementById('sel-flow-unit').selectedIndex].text;
+            document.getElementById('rpt-flow-u').innerText = document.getElementById('sel-flow-unit').options[document.getElementById('sel-flow-unit').selectedIndex].text;
             document.getElementById('rpt-pin').innerText = document.getElementById('inp-pin').value;
             document.getElementById('rpt-pout').innerText = document.getElementById('inp-pout').value;
-            document.getElementById('rpt-p-u').innerText =
-                document.getElementById('lbl-press-unit-out').innerText;
+            document.getElementById('rpt-p-u').innerText = document.getElementById('lbl-press-unit-out').innerText;
             document.getElementById('rpt-temp').innerText = document.getElementById('inp-temp').value;
-            document.getElementById('rpt-temp-u').innerText =
-                document.getElementById('sel-temp-unit')
-                        .options[document.getElementById('sel-temp-unit').selectedIndex].text;
+            document.getElementById('rpt-temp-u').innerText = document.getElementById('sel-temp-unit').options[document.getElementById('sel-temp-unit').selectedIndex].text;
 
             const launchRaw = document.getElementById('inp-launch').value;
-            document.getElementById('rpt-launch').innerText =
-                launchRaw ? new Date(launchRaw).toLocaleString() : "--";
+            document.getElementById('rpt-launch').innerText = launchRaw ? new Date(launchRaw).toLocaleString() : "--";
 
-            // 6) SV table
             const tbody = document.getElementById('rpt-sv-body');
             tbody.innerHTML = '';
-
             const uiRows = document.querySelectorAll('#wp-result-body tr');
             if (uiRows.length === 0) {
-                tbody.innerHTML =
-                    '<tr><td colspan="4">No SV Stations defined.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4">No SV Stations defined.</td></tr>';
             } else {
                 uiRows.forEach(row => {
                     const newRow = row.cloneNode(true);
-                    // Normalise colours for print (black text)
                     newRow.cells[0].style.color = "black";
                     newRow.cells[1].style.color = "black";
                     newRow.cells[2].style.color = "black";
                     const span = newRow.cells[2].querySelector('span');
-                    if (span && span.style.color === 'rgb(251, 191, 36)') {
-                        span.style.color = "#d97706";
-                    }
+                    if (span && span.style.color === 'rgb(251, 191, 36)') span.style.color = "#d97706";
                     tbody.appendChild(newRow);
                 });
             }
 
-            // Append receiver row
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-weight:bold">Receiver</td>
@@ -1853,7 +1796,6 @@
             `;
             tbody.appendChild(tr);
 
-            // 7) Trigger browser print with all fields updated
             window.print();
         }
 
@@ -1873,6 +1815,10 @@
             const inputs = { mode: currentMode, waypoints: waypoints };
             document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
             document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+            
+            // Save Selectors specifically
+            const npsEl = document.getElementById('sel-nps');
+            if(npsEl) inputs['sel-nps'] = npsEl.value;
 
             const newScenario = {
                 id: Date.now(),
@@ -1929,13 +1875,12 @@
             });
         }
 
-        // --- HELPER: APPLY DATA OBJECT TO UI ---
         function applyData(data) {
             if(data.mode) setMode(data.mode);
             
             if(Array.isArray(data.waypoints)) {
                 waypoints = data.waypoints;
-            } else if (data.sv) { // From URL
+            } else if (data.sv) { 
                 try {
                     const raw = JSON.parse(data.sv);
                     waypoints = raw.map(item => ({
@@ -1962,7 +1907,6 @@
                 'inp-sg': data.sg || data['inp-sg'],
                 'inp-visc': data.visc || data['inp-visc'],
                 'inp-launch': data.launch || data['inp-launch'],
-                
                 'sel-od-unit': data.u_od || data['sel-od-unit'],
                 'sel-wt-unit': data.u_wt || data['sel-wt-unit'],
                 'sel-dist-unit': data.u_dist || data['sel-dist-unit'],
@@ -1983,11 +1927,26 @@
                 }
             });
             
+            // Re-sync NPS logic if data present
+            const npsSel = document.getElementById('sel-nps');
+            if(npsSel && data['sel-nps']) {
+                npsSel.value = data['sel-nps'];
+                // We re-populate standard thicknesses but DON'T override inputs 
+                // because applyData just set them above.
+                populateStdWt(data['sel-nps']);
+            } else if (data.nps && npsSel) {
+                npsSel.value = data.nps; // from URL
+                populateStdWt(data.nps);
+            }
+
             calculate();
         }
 
         // --- INIT ---
         function init() {
+            // 1. Initialize NPS Dropdown
+            initNps();
+            
             const params = new URLSearchParams(window.location.search);
             if (params.has('mode')) {
                 const data = {};
@@ -1996,7 +1955,6 @@
                 }
                 setMode(data.mode || 'gas');
                 setTimeout(() => applyData(data), 50);
-                // Ensure Animation Starts for Shared Links
                 requestAnimationFrame(animate); 
                 return; 
             }
@@ -2014,7 +1972,15 @@
                 oneHourAgo.setMinutes(oneHourAgo.getMinutes() - oneHourAgo.getTimezoneOffset());
                 const el = document.getElementById('inp-launch');
                 if(el) el.value = oneHourAgo.toISOString().slice(0, 16);
-                calculate();
+                
+                // Default NPS 12 logic if new
+                const npsSel = document.getElementById('sel-nps');
+                if(npsSel) {
+                   npsSel.value = "12";
+                   handleNpsChange(); 
+                } else {
+                   calculate();
+                }
             }
             requestAnimationFrame(animate);
         }
@@ -2027,6 +1993,11 @@
             const inputs = { mode: currentMode, waypoints: waypoints };
             document.querySelectorAll('.calc-trigger').forEach(el => inputs[el.id] = el.value);
             document.querySelectorAll('.unit-change-trigger').forEach(el => inputs[el.id] = el.value);
+            
+            // Save state of NPS Selectors
+            const npsEl = document.getElementById('sel-nps');
+            if(npsEl) inputs['sel-nps'] = npsEl.value;
+            
             safeStorage.save('pigCalc_v6', inputs);
 
             document.querySelectorAll('.wp-tick').forEach(el => el.remove());
@@ -2139,7 +2110,7 @@
                     }
                 }
 
-                // --- 3. OUTPUTS & ANIMATION STATE ---
+                                // --- 3. OUTPUTS & ANIMATION STATE ---
                 // UI UPDATE ---
                 const pigVelKmh = pigVelMs * 3.6;
                 document.getElementById('out-vel-ms').innerText = pigVelMs.toFixed(2);
@@ -2147,6 +2118,8 @@
                 
                 const velCard = document.getElementById('card-velocity');
                 const velLabel = document.getElementById('label-velocity');
+                
+                // Color Code Velocity Card
                 if (usingActuals) {
                     velCard.classList.remove('dash-blue');
                     velCard.classList.add('dash-amber');
@@ -2157,40 +2130,74 @@
                     velLabel.innerText = "Velocity (Calc)";
                 }
 
+                // Gas/Liquid Details
                 if(currentMode === 'gas') {
                     document.getElementById('out-pavg').innerText = pAvgKg.toFixed(2);
                     document.getElementById('out-z').innerText = zFactor > 0 ? zFactor.toFixed(4) : "0.000";
                 }
                 document.getElementById('out-qact').innerText = Math.round(qActM3Day).toLocaleString();
 
+                // --- NEW: Decoupled Duration & ETA Logic ---
                 const totalDistKm = Math.abs(receiverKm - launcherKm);
-                const remDistKm = Math.abs(receiverKm - lastConfirmedKm); 
                 
-                if (pigVelMs > 0 && launchVal) {
-                    const remSeconds = (remDistKm * 1000) / pigVelMs;
-                    const etaMs = (lastConfirmedTime || new Date(launchVal).getTime()) + (remSeconds * 1000);
-                    const arrivalDate = new Date(etaMs);
+                // 1. Calculate Transit Time (Duration) - Depends ONLY on Velocity
+                if (pigVelMs > 0 && totalDistKm > 0) {
+                    // Total Duration = Total Distance / Velocity
+                    // If using actuals, we project the remaining distance at current actual speed
                     
-                    totalTravelHours = (etaMs - new Date(launchVal).getTime()) / 3600000;
+                    let projectedTotalSeconds = 0;
+                    
+                    if (usingActuals && launchVal) {
+                        // If we have actuals, Total Time = Elapsed Time + Remaining Time
+                        const remDistKm = Math.abs(receiverKm - lastConfirmedKm);
+                        const remSeconds = (remDistKm * 1000) / pigVelMs;
+                        const elapsedMs = lastConfirmedTime - new Date(launchVal).getTime();
+                        projectedTotalSeconds = (elapsedMs / 1000) + remSeconds;
+                    } else {
+                        // Theoretical: Simple Dist / Vel
+                        projectedTotalSeconds = (totalDistKm * 1000) / pigVelMs;
+                    }
 
-                    document.getElementById('out-eta-time').innerText = arrivalDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                    document.getElementById('out-eta-date').innerText = arrivalDate.toLocaleDateString();
-                    
+                    totalTravelHours = projectedTotalSeconds / 3600;
+
+                    // Format HH:MM
                     let h = Math.floor(totalTravelHours);
                     let m = Math.round((totalTravelHours - h) * 60);
                     if(m === 60) { m = 0; h++; }
                     document.getElementById('out-time-hhmm').innerText = `${h}:${m.toString().padStart(2,'0')}`;
                     document.getElementById('out-time-dec').innerText = totalTravelHours.toFixed(2);
+                    
+                } else {
+                    // Reset if no velocity
+                    document.getElementById('out-time-hhmm').innerText = "--:--";
+                    document.getElementById('out-time-dec').innerText = "0.00";
+                    totalTravelHours = 0;
+                }
 
+                // 2. Calculate ETA - Depends on Velocity AND Launch Time
+                if (pigVelMs > 0 && launchVal && totalDistKm > 0) {
+                    // We calculate ETA based on remaining distance from the last known point
+                    const remDistKm = Math.abs(receiverKm - lastConfirmedKm);
+                    const remSeconds = (remDistKm * 1000) / pigVelMs;
+                    
+                    // Start counting from: Last Confirmed Actual Time OR Launch Time
+                    const startTime = lastConfirmedTime || new Date(launchVal).getTime();
+                    const etaMs = startTime + (remSeconds * 1000);
+                    const arrivalDate = new Date(etaMs);
+
+                    document.getElementById('out-eta-time').innerText = arrivalDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                    document.getElementById('out-eta-date').innerText = arrivalDate.toLocaleDateString();
+
+                    // Status Text Update
                     const now = new Date();
                     if (now > arrivalDate) rptData.status = "Completed";
                     else if (now > new Date(launchVal)) rptData.status = "In Progress";
                     else rptData.status = "Scheduled";
 
                 } else {
-                    document.getElementById('out-time-hhmm').innerText = "--:--";
+                    // Reset ETA if no launch time
                     document.getElementById('out-eta-time').innerText = "--:--";
-                    totalTravelHours = 0;
+                    document.getElementById('out-eta-date').innerText = "--/--/----";
                     rptData.status = "Planning";
                 }
 
@@ -2255,8 +2262,7 @@
                     if (sortedWps.length === 0) wpCard.style.display = 'none';
                 }
 
-                // 5. SAFETY CHECK
-                if (pigVelMs > 5) { // > 5 m/s
+                if (pigVelMs > 5) {
                     addMessage('warn', `High Velocity Warning: ${pigVelMs.toFixed(2)} m/s exceeds standard safety limits.`, null);
                     document.getElementById('card-velocity').classList.add('dash-amber'); 
                 }
@@ -2322,15 +2328,12 @@
             requestAnimationFrame(animate);
         }
 
-        // --- GLOBAL INPUT GUARDS (key / paste / blur) ---
-
         function isNumericInput(el) {
             return el && el.tagName === 'INPUT' &&
                    el.type === 'number' &&
                    (el.classList.contains('input-field') || el.classList.contains('wp-input'));
         }
 
-        // Block e, E, +
         document.addEventListener('keydown', function (e) {
             if (!isNumericInput(e.target)) return;
             if (e.key === 'e' || e.key === 'E' || e.key === '+') {
@@ -2338,7 +2341,6 @@
             }
         }, true);
 
-        // Block paste in all input fields (.input-field and .wp-input)
         document.addEventListener('paste', function (e) {
             const t = e.target;
             if (t && t.classList && (t.classList.contains('input-field') || t.classList.contains('wp-input'))) {
@@ -2346,7 +2348,6 @@
             }
         }, true);
 
-        // Also block drag-drop (acts like paste in most browsers)
         document.addEventListener('drop', function (e) {
             const t = e.target;
             if (t && t.classList && (t.classList.contains('input-field') || t.classList.contains('wp-input'))) {
@@ -2354,7 +2355,6 @@
             }
         }, true);
 
-        // Auto-clamp on blur + safe minimum when cleared
         document.addEventListener('blur', function (e) {
             const t = e.target;
             if (!isNumericInput(t)) return;
